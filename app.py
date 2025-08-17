@@ -24,7 +24,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # ==== 謎の問題データ ====
 questions = [
-    {"text": "第1問のストーリーと問題文", "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1", "hint_keyword": "hint1", "hint_text": "第1問のヒントです"},
+    {"text": "第1問のストーリーと問題文", "image_url": "https://drive.google.com/uc?export=view&id=1GhjyvsaWP23x_wdz7n-nSqq5cziFcf1U", "hint_keyword": "hint1", "hint_text": "第1問のヒントです"},
     {"text": "第2問のストーリーと問題文", "image_url": "https://drive.google.com/uc?export=view&id=XXXXX2", "hint_keyword": "hint2", "hint_text": "第2問のヒントです"},
     {"text": "第3問のストーリーと問題文", "image_url": "https://drive.google.com/uc?export=view&id=XXXXX3", "hint_keyword": "hint3", "hint_text": "第3問のヒントです"},
     {"text": "第4問のストーリーと問題文", "image_url": "https://drive.google.com/uc?export=view&id=XXXXX4", "hint_keyword": "hint4", "hint_text": "第4問のヒントです"},
@@ -121,7 +121,7 @@ def handle_image(event):
         os.makedirs("static", exist_ok=True)
         os.rename(temp_path, static_path)
 
-        host_url = request.host_url if request.host_url else "https://your-render-app.onrender.com"  # 実際のURLに置き換え
+        host_url = request.host_url if request.host_url else "https://nazotoki-bot-4-7-1.onrender.com"  # 実際のURLに置き換え
         img_url = f"{host_url.rstrip('/')}/{static_path}"
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url})
         print(f"Added to pending judges: {img_url}")
