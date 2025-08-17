@@ -28,7 +28,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 questions = [
     {
         "text": "第1問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1",  # 実際のGoogle Drive画像IDに置き換え
+        "image_url": "https://drive.google.com/uc?export=view&id=1GhjyvsaWP23x_wdz7n-nSqq5cziFcf1U",  # 実際のGoogle Drive画像IDに置き換え
         "hint_keyword": "hint1",
         "hint_text": "第1問のヒントです"
     },
