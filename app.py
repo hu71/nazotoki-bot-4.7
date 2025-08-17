@@ -105,7 +105,7 @@ def handle_image(event):
     try:
         message_content = line_bot_api.get_message_content(event.message.id)
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
-        temp_path = f"/static/{unique_filename}"
+        temp_path = f"/tmp/{unique_filename}"
         static_path = f"static/{unique_filename}"
 
         os.makedirs("/tmp", exist_ok=True)
