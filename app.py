@@ -157,7 +157,7 @@ def handle_image(event):
         os.rename(temp_path, static_path)
 
         # request.host_urlがNoneの場合にデフォルト値を設定（実際のURLに置き換えが必要）
-        host_url = request.host_url if request.host_url else "https://your-render-app.onrender.com"
+        host_url = request.host_url if request.host_url else "https://nazotoki-bot-4-7-1.onrender.com"
         img_url = f"{host_url.rstrip('/')}/{static_path}"
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url})
 
