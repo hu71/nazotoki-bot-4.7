@@ -9,8 +9,8 @@ from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMess
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # ==== LINE Bot API設定 ====
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("W348KKAbbgZWPEABAKZQM7Uurl1mR1EqrByVQU6F2rAWP1Cb0/Zlltkj3JpZoREibxY7719UNGh96EUMa8QbsGBf9K5rDWhJpq8XTxakXRstBEMpBM7IcwazhYbDsnyg8ixEAY0K4eRXkxlG9FsuOgdB04t89/1O/w1cDnyilFU=")
+LINE_CHANNEL_SECRET = os.environ.get("6c12aedc292307f95ccd67e959973761")
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
     raise ValueError("LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET must be set in environment variables.")
@@ -32,7 +32,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 questions = [
     {
         "text": "第1問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1",
+        "image_url": "https://drive.google.com/uc?export=view&id=1GhjyvsaWP23x_wdz7n-nSqq5cziFcf1U",
         "hint_keyword": "hint1",
         "hint_text": "第1問のヒントです"
     },
