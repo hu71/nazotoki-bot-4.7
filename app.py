@@ -9,7 +9,7 @@ from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMess
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # ==== LINE Bot API設定 ====
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("W348KKAbbgZWPEABAKZQM7Uurl1mR1EqrByVQU6F2rAWP1Cb0/Zlltkj3JpZoREibxY7719UNGh96EUMa8QbsGBf9K5rDWhJpq8XTxakXRstBEMpBM7IcwazhYbDsnyg8ixEAY0K4eRXkxlG9FsuOgdB04t89/1O/w1cDnyilFU=")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("lFandahrl/7AVNbXGGr86ePWLwBouaLddcjAOWgvHLyTRb7KmPd9zeb/D9CGLvBubxY7719UNGh96EUMa8QbsG Bf9K5rDWhJpq8XTxakXRuJV8Re3WubJNmxNEDbbZRqOoDL+2CThq985mTQR8hWjAdB04t89/1O/w1cDnyilFU=")
 LINE_CHANNEL_SECRET = os.environ.get("6c12aedc292307f95ccd67e959973761")
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
