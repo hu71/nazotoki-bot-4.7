@@ -9,8 +9,8 @@ from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMess
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # ==== LINE Bot API設定 ====
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("W348KKAbbgZWPEABAKZQM7Uurl1mR1EqrByVQU6F2rAWP1Cb0/Zlltkj3JpZoREibxY7719UNGh96EUMa8QbsGBf9K5rDWhJpq8XTxakXRstBEMpBM7IcwazhYbDsnyg8ixEAY0K4eRXkxlG9FsuOgdB04t89/1O/w1cDnyilFU=")
-LINE_CHANNEL_SECRET = os.environ.get("6c12aedc292307f95ccd67e959973761")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
     raise ValueError("LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET must be set in environment variables.")
@@ -32,7 +32,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 questions = [
     {
         "text": "第1問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=1GhjyvsaWP23x_wdz7n-nSqq5cziFcf1U",
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1",
         "hint_keyword": "hint1",
         "hint_text": "第1問のヒントです"
     },
@@ -180,7 +180,7 @@ def handle_image(event):
         print(f"Permission error: {str(pe)} - Check directory permissions at {os.getcwd()}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：書き込み権限がありません。"))
     except IOError as ioe:
-        print(f"IO error: {str(ioe)} - Verify disk space and /tmp directory")
+        print(f"IO error: {str(ioe)} - Verify disk space or permissions at {os.getcwd()}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：ファイル操作に失敗しました。"))
     except Exception as e:
         print(f"Unexpected error in handle_image: {str(e)} - Please check logs")
@@ -193,8 +193,17 @@ def judge():
 
     if request.method == "POST":
         user_id = request.form["user_id"]
-        qnum = int(request.form["qnum"])
+        qnum_str = request.form.get("qnum", "")  # デフォルト値として空文字を指定
         result = request.form["result"]
+
+        # qnumを整数に変換する前にバリデーション
+        try:
+            qnum = int(qnum_str) if qnum_str.isdigit() else -1
+            if qnum < 0 or qnum >= len(questions):
+                raise ValueError(f"Invalid qnum: {qnum_str}")
+        except ValueError as e:
+            print(f"ValueError in judge: {str(e)} - qnum_str was {qnum_str}")
+            return "Invalid question number", 400
 
         try:
             if qnum == 4:
