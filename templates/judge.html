@@ -1,1 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>画像判定</title>
+</head>
+<body>
+    <h1>判定待ち画像</h1>
+    {% for judge in judges %}
+        <p>User ID: {{ judge.user_id }} | Question: {{ judge.qnum }}</p>
+        <img src="{{ judge.img_url }}" width="300">
+        <form method="POST">
+            <input type="hidden" name="user_id" value="{{ judge.user_id }}">
+            <input type="hidden" name="qnum" value="{{ judge.qnum }}">
+            <select name="result">
+                <option value="correct">正解</option>
+                <option value="incorrect">不正解</option>
+                {% if judge.qnum == 4 %}
+                    <option value="correct1">Goodエンディング</option>
+                    <option value="correct2">Badエンディング</option>
+                {% endif %}
+            </select>
+            <button type="submit">判定</button>
+        </form>
+        <hr>
+    {% endfor %}
 
+    <h1>判定履歴</h1>
+    {% for history in history %}
+        <p>User ID: {{ history.user_id }} | Question: {{ history.qnum }} | Result: {{ history.result }}</p>
+        <img src="{{ history.img_url }}" width="300">
+        <hr>
+    {% endfor %}
+</body>
+  </html>
