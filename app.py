@@ -152,7 +152,7 @@ def handle_image(event):
             return
 
         # ホストURLを安全に取得
-        host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://your-render-app.onrender.com")
+        host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://nazotoki-bot-4-7-2.onrender.com")
         img_url = f"{host_url.rstrip('/')}/tmp/{unique_filename}"
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url})
 
