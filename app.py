@@ -28,37 +28,37 @@ questions = [
         "text": "第1問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1",
         "hint_keyword": "hint1",
-        "hint_text": "第1問のヒントです"
+        "hint_text": "第1問のヒント"
     },
     {
         "text": "第2問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX2",
         "hint_keyword": "hint2",
-        "hint_text": "第2問のヒントです"
+        "hint_text": "第2問のヒント"
     },
     {
         "text": "第3問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX3",
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒントです"
+        "hint_text": "第3問のヒント"
     },
     {
         "text": "第4問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX4",
         "hint_keyword": "hint4",
-        "hint_text": "第4問のヒントです"
+        "hint_text": "第4問のヒント"
     },
     {
         "text": "第5問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX5",
         "hint_keyword": "hint5",
-        "hint_text": "第5問のヒントです"
+        "hint_text": "第5問のヒント"
     },
     {
         "text": "終章: 最後の問題",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX6",
         "hint_keyword": "hint6",
-        "hint_text": "最後のヒントです"
+        "hint_text": "最後のヒント"
     }
 ]
 
@@ -190,23 +190,23 @@ def judge():
         try:
             if qnum == 4:
                 if result == "correct1":
-                    line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ Goodエンディング！"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ Goodエンディング"))
                 elif result == "correct2":
-                    line_bot_api.push_message(user_id, TextSendMessage(text="正解！ Badエンディング！"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="正解！ Badエンディング"))
                 else:
-                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！ヒントと送ると何かあるかも"))
             elif qnum == 5:
                 if result == "correct":
-                    line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典があるよ。探偵事務所にお越しください。"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典"))
                 else:
-                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！ヒントと送ると何かあるかも"))
             else:
                 if result == "correct":
                     line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                     user_states[user_id]["current_q"] += 1
                     send_question(user_id, user_states[user_id]["current_q"])
                 else:
-                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。ヒントと送ると何かあるかも"))
 
             for j in pending_judges:
                 if j["user_id"] == user_id and j["qnum"] == qnum:
@@ -221,5 +221,5 @@ def judge():
             print(f"Failed to send result to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
             return "API error", 500
 
-    # GETリクエスト時の処理を追加
+
     return render_template("judge.html", judges=pending_judges, history=judged_history)
