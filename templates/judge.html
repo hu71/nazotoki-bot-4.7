@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Judge</title>
+    <style>
+        .judge-item { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        .image-preview { max-width: 300px; max-height: 300px; }
+        .history-item { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Pending Judgments</h1>
+    {% if judges is defined and judges is iterable %}
+        {% for judge in judges %}
+            <div class="judge-item">
+                <p><strong>User ID:</strong> {{ judge.user_id|default('Unknown') }}</p>
+                <p><strong>Question Number:</strong> {{ judge.qnum|default(0) }}</p>
+                <img src="{{ judge.img_url|default('') }}" alt="Sent Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
+                <form method="post" action="/judge">
+                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                    <select name="result">
+                        <option value="correct">正解</option>
+                        <option value="incorrect">不正解</option>
+                        {% if judge.qnum|default(0) == 4 %}
+                            <option value="correct1">Goodエンディング</option>
+                            <option value="correct2">Badエンディング</option>
+                        {% elif judge.qnum|default(0) == 5 %}
+                            <option value="correct">大正解</option>
+                        {% endif %}
+                    </select>
+                    <input type="submit" value="判定">
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No pending judgments.</p>
+    {% endif %}
 
+    <h1>Judgment History</h1>
+    {% if history is defined and history is iterable %}
+        {% for item in history %}
+            <div class="history-item">
+                <p><strong>User ID:</strong> {{ item.user_id|default('Unknown') }}</p>
+                <p><strong>Question Number:</strong> {{ item.qnum|default(0) }}</p>
+                <p><strong>Result:</strong> {{ item.result|default('N/A') }}</p>
+                <img src="{{ item.img_url|default('') }}" alt="History Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No judgment history.</p>
+    {% endif %}
+</body>
+</html>
