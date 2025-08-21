@@ -32,7 +32,7 @@ questions = [
 長に代わって新人さんの推理力を鍛えること！」
 「では早速、問題です！探偵見習いのテストです。 制限時間は……所長が帰ってくるま
 でにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ」''',
-        "image_url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_",
+        "image_url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY",
         "hint_keyword": "hint1"
    
     },
