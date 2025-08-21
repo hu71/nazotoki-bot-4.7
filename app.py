@@ -34,7 +34,7 @@ questions = [
 でにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ」''',
         "image_url": "https://drive.google.com/file/d/1vxITAOfyz234ZFTapvFhrS3re4y6X0sG/view?usp=drivesdk",
         "hint_keyword": "hint1"
-        "hint_text": ''0,2,5,,,''
+        "hint_text": "0,2,5,,,"
    
     },
     {
