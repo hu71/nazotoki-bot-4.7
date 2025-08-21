@@ -33,38 +33,39 @@ questions = [
 「では早速、問題です！探偵見習いのテストです。 制限時間は……所長が帰ってくるま
 でにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ」",
         "image_url": "https://drive.google.com/file/d/1vxITAOfyz234ZFTapvFhrS3re4y6X0sG/view?usp=drivesdk",
-        "hint_keyword": "hint1",
+        "hint_keyword": "hint1"
         "hint_text": "0,2,5…"
+   
     },
     {
         "text": "第2問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX2",
         "hint_keyword": "hint2",
-        "hint_text": "第2問のヒントです"
+        "hint_text": "第2問のヒント"
     },
     {
         "text": "第3問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX3",
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒントです"
+        "hint_text": "第3問のヒント"
     },
     {
         "text": "第4問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX4",
         "hint_keyword": "hint4",
-        "hint_text": "第4問のヒントです"
+        "hint_text": "第4問のヒント"
     },
     {
         "text": "第5問のストーリーと問題文",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX5",
         "hint_keyword": "hint5",
-        "hint_text": "第5問のヒントです"
+        "hint_text": "第5問のヒント"
     },
     {
         "text": "終章: 最後の問題",
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX6",
         "hint_keyword": "hint6",
-        "hint_text": "最後のヒントです"
+        "hint_text": "最後のヒント"
     }
 ]
 
