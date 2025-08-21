@@ -203,7 +203,7 @@ def judge():
                             line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
                     elif qnum == 5:
                         if result == "correct":
-                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典があるよ。探偵事務所にお越しください。"))
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典があるよ。"))
                         else:
                             line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
                     else:
