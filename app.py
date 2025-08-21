@@ -196,14 +196,14 @@ def judge():
                 if judge_to_process:
                     if qnum == 4:
                         if result == "correct1":
-                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ Goodエンディング！"))
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ Goodエンディング"))
                         elif result == "correct2":
-                            line_bot_api.push_message(user_id, TextSendMessage(text="正解！ Badエンディング！"))
+                            line_bot_api.push_message(user_id, TextSendMessage(text="正解！ Badエンディング"))
                         else:
                             line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
                     elif qnum == 5:
                         if result == "correct":
-                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典があるよ。"))
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典"))
                         else:
                             line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
                     else:
@@ -229,5 +229,4 @@ def judge():
                 print(f"Invalid qnum: {qnum}")
                 return "Invalid data", 400
 
-    # GETリクエスト時の処理（正誤判定は実行しない）
     return render_template("judge.html", judges=pending_judges, history=judged_history)
