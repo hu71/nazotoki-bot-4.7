@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Judge</title>
+    <style>
+        .judge-item { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        .image-preview { max-width: 300px; max-height: 300px; }
+        .history-item { margin-bottom: 10px; }
+        .button-group { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Pending Judgments</h1>
+    {% if judges is defined and judges is iterable %}
+        {% for judge in judges %}
+            <div class="judge-item">
+                <p><strong>User ID:</strong> {{ judge.user_id|default('Unknown') }}</p>
+                <p><strong>Question Number:</strong> {{ judge.qnum|default(0) }}</p>
+                <img src="{{ judge.img_url|default('') }}" alt="Sent Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
+                <div class="button-group">
+                    <form method="post" action="/judge" style="display:inline;">
+                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                        <input type="hidden" name="result" value="correct">
+                        <input type="submit" value="正解">
+                    </form>
+                    <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
+                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                        <input type="hidden" name="result" value="incorrect">
+                        <input type="submit" value="不正解">
+                    </form>
+                    {% if judge.qnum|default(0) == 4 %}
+                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
+                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                            <input type="hidden" name="result" value="correct1">
+                            <input type="submit" value="Goodエンディング">
+                        </form>
+                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
+                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                            <input type="hidden" name="result" value="correct2">
+                            <input type="submit" value="Badエンディング">
+                        </form>
+                    {% elif judge.qnum|default(0) == 5 %}
+                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
+                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                            <input type="hidden" name="result" value="correct">
+                            <input type="submit" value="大正解">
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No pending judgments.</p>
+    {% endif %}
 
+    <h1>Judgment History</h1>
+    {% if history is defined and history is iterable %}
+        {% for item in history %}
+            <div class="history-item">
+                <p><strong>User ID:</strong> {{ item.user_id|default('Unknown') }}</p>
+                <p><strong>Question Number:</strong> {{ item.qnum|default(0) }}</p>
+                <p><strong>Result:</strong> {{ item.result|default('N/A') }}</p>
+                <img src="{{ item.img_url|default('') }}" alt="History Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No judgment history.</p>
+    {% endif %}
+</body>
+      </html>
