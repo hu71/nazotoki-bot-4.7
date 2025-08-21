@@ -25,10 +25,16 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # ==== 謎の問題データ ====
 questions = [
     {
-        "text": "第1問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX1",
+        "text": "「やっほー！新米探偵さん！」
+画面に探偵姿の少女が現れ、元気に
+「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
+「ここに来てるってことは、君は探偵見習いだよね？サクラの仕事は、 忙しいオサダ所
+長に代わって新人さんの推理力を鍛えること！」
+「では早速、問題です！探偵見習いのテストです。 制限時間は……所長が帰ってくるま
+でにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ」",
+        "image_url": "https://drive.google.com/file/d/1vxITAOfyz234ZFTapvFhrS3re4y6X0sG/view?usp=drivesdk",
         "hint_keyword": "hint1",
-        "hint_text": "第1問のヒントです"
+        "hint_text": "0,2,5…"
     },
     {
         "text": "第2問のストーリーと問題文",
