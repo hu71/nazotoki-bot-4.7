@@ -26,30 +26,67 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 questions = [
     {
         "text":'''「やっほー！新米探偵さん！」
-；画面に探偵姿の少女が現れ、元気に
 「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
-「ここに来てるってことは、君は探偵見習いだよね？サクラの仕事は、 忙しいオサダ所
-長に代わって新人さんの推理力を鍛えること！」
-「では早速、問題です！探偵見習いのテストです。 制限時間は……所長が帰ってくるま
-でにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ」''',
+「ここに来てるってことは、君は探偵見習いだよね？サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
+「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''',
         "image_url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_",
         "hint_keyword": "hint1"
+        "hint_text": "第2問のヒント"
    
     },
     {
-        "text": "第2問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX2",
+        "text": '''「ご名答、です！やっぱりオサダ探偵事務所の一員たるもの、英語くらいできませんとね！さすが、サクラが見込んだだけありました！」
+「ではでは新米さん。次の……いや、もう時間みたいですね」
+サクラが画面からフェードアウトするのと所長室の扉が開くのはほぼ同時だった。
+「すみません、長々とお待たせしたうえで恐縮ですが……」
+申し訳ないが急用が入ってしまった、 とのことでオサダとの面接は後日ということになった。
+挨拶して事務所を出る、と同時にスマホの通知音が鳴った。
+「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」
+[SPLIT]
+ネットサーフィンをしていると一つの記事が目に留まった。
+「特集 オサダ探偵所のシャーロック・ホームズ」カエデを取り上げた記事だ。
+【明治時代からの貴族の令嬢】【大学を飛び級で首席卒業】といった肩書の中にこれまで解決した事件の難解さと鮮やかな手際が事細かに書かれている。
+圧倒されるほどの輝かしい経歴を眺めていると、
+「噓ばっかり……【削除済み】」
+一瞬サクラのメッセージが見えた気がしたが瞬きの合間に消えた。
+すぐにいつもの調子でサクラが元気に話しかけてくる。
+「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！
+というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''',
+        "image_url": "https://drive.google.com/uc?export=view&id=16hDDwLKg7gf367LT32kxUF5rAfThU66S",
         "hint_keyword": "hint2",
         "hint_text": "第2問のヒント"
     },
     {
-        "text": "第3問のストーリーと問題文",
-        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX3",
+        "text": '''「ご名答、です！ マッチポンプ、盗みの予告状を自分の下に出したり、難事件を紐解くとかなりあるんですよねー。探偵カエデの解決した事件にもそんな事件がいくつかあ
+ったらしいですよ？例えば……」
+[SPLIT]
+またしてもサクラが勝手に喋り出す。
+「ノックスの十戒って知ってますか？推理小説が守るべきルールのことで謎解きをフェアにするためにあるんです。最近は守られないことも多いですけどね」
+「実際の事件はもっとつまらなかったりしますよ。センセーショナルな難事件よりも単な通り魔の犯行なんかの方がよっぽど多い。そんな事件には『名探偵』も形無しです」
+いつも陽気なサクラにしては珍しく毒づくようなことを言う。
+「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」
+おもむろにサクラはいつもの調子を取り戻した。''',
+        "image_url": "https://drive.google.com/uc?export=view&id=12D6c3LtrlXnuUcmc4vNxPq-aLeUw3Ukd",
         "hint_keyword": "hint3",
         "hint_text": "第3問のヒント"
     },
     {
-        "text": "第4問のストーリーと問題文",
+        "text": '''「正解です！ 事故死と言っても、探偵は事故で呼ばれたりはしませんからねー。基本的には縁がないものです。殺人事件に思われたが実は事故だった、事故と思われたけど実は殺人だった、みたいな話はちらほらありますけどね」
+        [SPLIT]
+        「お待たせして申し訳ありません」 オサダからの電話はそう始まった。ようやくまとまった時間を取れるようになったようだ。
+明日の昼からということになった。 直前まで外せない用事があるそうで、 何とかして
+時間を捻出したと言っていた。
+それからしばらくして。
+「新米さんは、探偵ってどんな仕事だと思います？」
+サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。
+「一つだけ、サクラからアドバイスがあります。探偵としての心構えについて」
+「探偵というのは、悪い仕事です」
+「探偵は人の真実を暴きます。正義のために。それが常にいいことという保証はない、
+そこを理解しないといけないと、私は思っています」
+そこまで言ったところでサクラは急に口ごもった。
+しばらくして、何もなかったかのようにサクラが再び口を開いた。
+「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理
+小説風の問題です、頭をフル回転して解いてくださいね」''',
         "image_url": "https://drive.google.com/uc?export=view&id=XXXXX4",
         "hint_keyword": "hint4",
         "hint_text": "第4問のヒント"
@@ -78,14 +115,19 @@ def send_question(user_id, qnum):
     if qnum < len(questions):
         q = questions[qnum]
         try:
-            line_bot_api.push_message(
-                user_id,
-                [
-                    TextSendMessage(text=q["text"]),
-                    ImageSendMessage(original_content_url=q["image_url"], preview_image_url=q["image_url"]),
-                    TextSendMessage(text="答えとなるものの写真を送ってね！")
-                ]
-            )
+            messages = []
+            parts = q["text"].split("[SPLIT]")
+            for part in parts:
+                part = part.strip()
+                if part:
+                    messages.append(TextSendMessage(text=part))
+            messages.append(ImageSendMessage(
+                original_content_url=q["image_url"],
+                preview_image_url=q["image_url"]
+            ))
+            messages.append(TextSendMessage(text="答えとなるものの写真を送ってね！"))
+            for i in range(0, len(messages), 5):
+                line_bot_api.push_message(user_id, messages[i:i+5])
         except LineBotApiError as e:
             print(f"Failed to send question to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
             raise
