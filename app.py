@@ -1,12 +1,12 @@
 import os
-import time
-from flask import Flask, request
+import uuid
+from flask import Flask, request, render_template, redirect, url_for
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage  # TextSendMessageを追加
+from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage
 
 # Flaskアプリケーションの設定
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # ==== LINE Bot API設定 ====
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
@@ -25,112 +25,89 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # ==== 謎の問題データ ====
 questions = [
     {
-        "story_messages": [
-            {"text": "第1問のストーリー", "delay_seconds": 1},
-            {"text": "第1問のストーリー", "delay_seconds": 2}
-        ],
-        "puzzle_message": {"text": "第1問の問題文", "delay_seconds": 1.5},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX1", "delay_seconds": 2},
+        "text":'''「やっほー！新米探偵さん！」
+「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
+「ここに来てるってことは、君は探偵見習いだよね？サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
+「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''',
+        "image_url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_",
         "hint_keyword": "hint1",
-        "hint_text":"第1問のヒント",
-        "correct_answer": "correct1"
+        "hint_text": "第2問のヒント"
+   
     },
     {
-        "story_messages": [
-            {"text": "第2問のストーリー", "delay_seconds": 2}
-        ],
-        "puzzle_message": {"text": "第2問の問題文", "delay_seconds": 1},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX2", "delay_seconds": 3},
+        "text": '''「ご名答、です！やっぱりオサダ探偵事務所の一員たるもの、英語くらいできませんとね！さすが、サクラが見込んだだけありました！」
+「ではでは新米さん。次の……いや、もう時間みたいですね」
+サクラが画面からフェードアウトするのと所長室の扉が開くのはほぼ同時だった。
+「すみません、長々とお待たせしたうえで恐縮ですが……」
+申し訳ないが急用が入ってしまった、 とのことでオサダとの面接は後日ということになった。
+挨拶して事務所を出る、と同時にスマホの通知音が鳴った。
+「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」
+[SPLIT]
+ネットサーフィンをしていると一つの記事が目に留まった。
+「特集 オサダ探偵所のシャーロック・ホームズ」カエデを取り上げた記事だ。
+【明治時代からの貴族の令嬢】【大学を飛び級で首席卒業】といった肩書の中にこれまで解決した事件の難解さと鮮やかな手際が事細かに書かれている。
+圧倒されるほどの輝かしい経歴を眺めていると、
+「噓ばっかり……【削除済み】」
+一瞬サクラのメッセージが見えた気がしたが瞬きの合間に消えた。
+すぐにいつもの調子でサクラが元気に話しかけてくる。
+「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！
+というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''',
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX2",
         "hint_keyword": "hint2",
-        "hint_text": "第2問のヒント",
-        "correct_answer": "correct2"
+        "hint_text": "第2問のヒント"
     },
     {
-        "story_messages": [
-            {"text": "第3問のストーリー", "delay_seconds": 0.5},
-            {"text": "第3問のストーリー", "delay_seconds": 1},
-            {"text": "第3問のストーリー", "delay_seconds": 1.5}
-        ],
-        "puzzle_message": {"text": "第3問の問題文", "delay_seconds": 2},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX3", "delay_seconds": 1},
+        "text": "第3問のストーリーと問題文",
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX3",
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒント",
-        "correct_answer": "correct3"
+        "hint_text": "第3問のヒント"
     },
     {
-        "story_messages": [
-            {"text": "第4問のストーリー", "delay_seconds": 1},
-            {"text": "第4問のストーリー", "delay_seconds": 1}
-        ],
-        "puzzle_message": {"text": "第4問の問題文", "delay_seconds": 1.5},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX4", "delay_seconds": 2},
+        "text": "第4問のストーリーと問題文",
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX4",
         "hint_keyword": "hint4",
-        "hint_text": "第4問のヒント",
-        "correct_answer": "correct4"
+        "hint_text": "第4問のヒント"
     },
     {
-        "story_messages": [
-            {"text": "第5問のストーリー", "delay_seconds": 1}
-        ],
-        "puzzle_message": {"text": "第5問の問題文", "delay_seconds": 1},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX5", "delay_seconds": 1.5},
+        "text": "第5問のストーリーと問題文",
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX5",
         "hint_keyword": "hint5",
-        "hint_text": "第5問のヒント",
-        "correct_answer": ["correct5a", "correct5b"],  # 正解が2つ（correct5aとcorrect5b）
-        "good_end_story": [
-            {"text": "Goodエンドのストーリー", "delay_seconds": 1},
-            {"text": "Goodエンドのストーリー", "delay_seconds": 1}
-        ],
-        "bad_end_story": [
-            {"text": "Badエンドのストーリー", "delay_seconds": 1},
-            {"text": "Badエンドのストーリー", "delay_seconds": 1}
-        ]
+        "hint_text": "第5問のヒント"
     },
     {
-        "story_messages": [
-            {"text": "終章のストーリー", "delay_seconds": 1},
-            {"text": "終章のストーリー", "delay_seconds": 1}
-        ],
-        "puzzle_message": {"text": "終章のおまけ謎", "delay_seconds": 2},
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX6", "delay_seconds": 1},
+        "text": "終章: 最後の問題",
+        "image_url": "https://drive.google.com/uc?export=view&id=XXXXX6",
         "hint_keyword": "hint6",
-        "hint_text": "終章のヒント",
-        "correct_answer": "correct6"
+        "hint_text": "最後のヒント"
     }
 ]
 
 # ==== ユーザーごとの進行状況と回答 ====
-user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers]}}
+user_states = {}        # {user_id: {"current_q": int, "answers": [list of answers]}}
+pending_judges = []     # [{"user_id": str, "qnum": int, "img_url": str}]
+judged_history = []     # [{"user_id": str, "qnum": int, "img_url": str, "result": str}]
 
-# ==== 関数: 問題またはストーリーを送信 ====
-def send_content(user_id, content_type, content_data, next_qnum=None):
-    try:
-        if content_type == "question":
-            q = content_data
-            for story_msg in q["story_messages"]:
-                line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-                time.sleep(story_msg["delay_seconds"])
-            line_bot_api.push_message(user_id, TextSendMessage(text=q["puzzle_message"]["text"]))
-            time.sleep(q["puzzle_message"]["delay_seconds"])
-            line_bot_api.push_message(
-                user_id,
-                ImageSendMessage(original_content_url=q["image_url"]["url"], preview_image_url=q["image_url"]["url"])
-            )
-            time.sleep(q["image_url"]["delay_seconds"])
-            line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってね！"))
-        elif content_type == "end_story":
-            for story_msg in content_data:
-                line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-                time.sleep(story_msg["delay_seconds"])
-            if next_qnum is not None:
-                send_question(user_id, next_qnum)
-    except LineBotApiError as e:
-        print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
-        raise
-
+# ==== 関数: 問題を送信 ====
 def send_question(user_id, qnum):
     if qnum < len(questions):
-        send_content(user_id, "question", questions[qnum])
+        q = questions[qnum]
+        try:
+            messages = []
+            parts = q["text"].split("[SPLIT]")
+            for part in parts:
+                part = part.strip()
+                if part:
+                    messages.append(TextSendMessage(text=part))
+            messages.append(ImageSendMessage(
+                original_content_url=q["image_url"],
+                preview_image_url=q["image_url"]
+            ))
+            messages.append(TextSendMessage(text="答えとなるものの写真を送ってね！"))
+            for i in range(0, len(messages), 5):
+                line_bot_api.push_message(user_id, messages[i:i+5])
+        except LineBotApiError as e:
+            print(f"Failed to send question to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+            raise
     else:
         line_bot_api.push_message(user_id, TextSendMessage(text="全ての問題が終了しました！"))
 
@@ -164,37 +141,117 @@ def handle_text(event):
 
     if user_id in user_states:
         qnum = user_states[user_id]["current_q"]
-        if qnum < len(questions):
-            q = questions[qnum]
-            if text.lower() == q["hint_keyword"].lower():
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=q["hint_text"])
-                )
-                return
-            elif qnum < 4 and text.lower() == q["correct_answer"].lower():  # 1〜4問
-                user_states[user_id]["current_q"] += 1
-                send_question(user_id, user_states[user_id]["current_q"])
-                return
-            elif qnum == 4 and text.lower() in q["correct_answer"]:  # 第5問の正解1/2
-                if text.lower() == q["correct_answer"][0]:  # correct5a → Goodエンド
-                    send_content(user_id, "end_story", q["good_end_story"], 5)
-                elif text.lower() == q["correct_answer"][1]:  # correct5b → Badエンド
-                    send_content(user_id, "end_story", q["bad_end_story"], 5)
-                return
-            elif qnum == 4 and text.lower() not in q["correct_answer"]:  # 第5問の不正解
-                send_content(user_id, "end_story", q["bad_end_story"], 5)
-                return
-            elif qnum == 5 and text.lower() == q["correct_answer"].lower():  # 終章のおまけ謎
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！"))
-                user_states[user_id]["current_q"] += 1
-                send_question(user_id, user_states[user_id]["current_q"])
-                return
-            else:  # 不正解
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"残念。不正解です。{q['hint_keyword']}と送ると何かあるかも"))
-                return
+        if qnum < len(questions) and text.lower() == questions[qnum]["hint_keyword"].lower():
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=questions[qnum]["hint_text"])
+            )
+            return
 
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text="メッセージを理解できませんでした。"))
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_image(event):
+    user_id = event.source.user_id
+
+    if user_id not in user_states:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="まずは『start』と送って始めてね！"))
+        return
+
+    qnum = user_states[user_id]["current_q"]
+
+    try:
+        print(f"Fetching image for user {user_id}, question {qnum}")
+        message_content = line_bot_api.get_message_content(event.message.id)
+        
+        # 一意のファイル名を生成
+        unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
+        temp_path = f"/tmp/{unique_filename}"
+        os.makedirs("/tmp", exist_ok=True)
+        with open(temp_path, "wb") as f:
+            for chunk in message_content.iter_content(chunk_size=1024):
+                f.write(chunk)
+
+        if not os.path.exists(temp_path):
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：画像を保存できませんでした。"))
+            return
+
+        # 静的フォルダにコピー
+        static_path = os.path.join(app.static_folder, unique_filename)
+        with open(static_path, "wb") as f:
+            with open(temp_path, "rb") as temp_f:
+                f.write(temp_f.read())
+
+        # ホストURLを安全に取得
+        host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://nazotoki-bot-4-7-2.onrender.com")
+        img_url = f"{host_url.rstrip('/')}/static/{unique_filename}"
+        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url})
+
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
+
+    except LineBotApiError as e:
+        print(f"LineBotApi error: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}, Error details: {getattr(e, 'error_details', 'N/A')}")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：API接続に失敗しました。"))
+    except PermissionError as pe:
+        print(f"Permission error: {str(pe)}")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：書き込み権限がありません。"))
+    except IOError as ioe:
+        print(f"IO error: {str(ioe)}")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：ファイル操作に失敗しました。"))
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="画像の処理中にエラーが発生しました。もう一度試してください。"))
+
+# ==== 判定フォーム ====
+@app.route("/judge", methods=["GET", "POST"])
+def judge():
+    global pending_judges, judged_history
+
+    if request.method == "POST":
+        user_id = request.form.get("user_id")
+        qnum = request.form.get("qnum")
+        result = request.form.get("result")
+
+        # POSTデータが全て揃っていて、pending_judgesに該当データがある場合のみ処理
+        if user_id and qnum and result:
+            try:
+                qnum = int(qnum)
+                # 対応するpending_judgesエントリが存在するか確認
+                judge_to_process = next((j for j in pending_judges if j["user_id"] == user_id and j["qnum"] == qnum), None)
+                if judge_to_process:
+                    if qnum == 4:
+                        if result == "correct1":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ Goodエンディング"))
+                        elif result == "correct2":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="正解！ Badエンディング"))
+                        else:
+                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    elif qnum == 5:
+                        if result == "correct":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！ クリア特典"))
+                        else:
+                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    else:
+                        if result == "correct":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
+                            if user_id in user_states:
+                                user_states[user_id]["current_q"] += 1
+                                send_question(user_id, user_states[user_id]["current_q"])
+                        else:
+                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+
+                    judged_history.append({
+                        "user_id": user_id,
+                        "qnum": qnum,
+                        "img_url": judge_to_process["img_url"],
+                        "result": result
+                    })
+                    pending_judges = [j for j in pending_judges if not (j["user_id"] == user_id and j["qnum"] == qnum)]
+            except LineBotApiError as e:
+                print(f"Failed to send result to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+                return "API error", 500
+            except ValueError:
+                print(f"Invalid qnum: {qnum}")
+                return "Invalid data", 400
+
+    return render_template("judge.html", judges=pending_judges, history=judged_history)
