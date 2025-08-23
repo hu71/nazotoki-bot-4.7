@@ -1,75 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>Image Judge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>判定フォーム</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .judge-item { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
-        .image-preview { max-width: 300px; max-height: 300px; }
-        .history-item { margin-bottom: 10px; }
-        .button-group { margin-top: 10px; }
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .judge-card, .history-card {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        .btn-correct { background-color: #28a745; border-color: #28a745; }
+        .btn-incorrect { background-color: #dc3545; border-color: #dc3545; }
+        .btn-good { background-color: #007bff; border-color: #007bff; }
+        .btn-bad { background-color: #ffc107; border-color: #ffc107; }
+        .btn-clear { background-color: #17a2b8; border-color: #17a2b8; }
+        .btn-group form { display: inline-block; margin-right: 0.5rem; }
+        .no-data { font-style: italic; color: #6c757d; }
+        .container { max-width: 1000px; }
     </style>
 </head>
 <body>
-    <h1>Pending Judgments</h1>
-    {% if judges is defined and judges is iterable %}
-        {% for judge in judges %}
-            <div class="judge-item">
-                <p><strong>User ID:</strong> {{ judge.user_id|default('Unknown') }}</p>
-                <p><strong>Question Number:</strong> {{ judge.qnum|default(0) }}</p>
-                <img src="{{ judge.img_url|default('') }}" alt="Sent Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
-                <div class="button-group">
-                    <form method="post" action="/judge" style="display:inline;">
-                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                        <input type="hidden" name="result" value="correct">
-                        <input type="submit" value="正解">
-                    </form>
-                    <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
-                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                        <input type="hidden" name="result" value="incorrect">
-                        <input type="submit" value="不正解">
-                    </form>
-                    {% if judge.qnum|default(0) == 4 %}
-                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
-                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                            <input type="hidden" name="result" value="correct1">
-                            <input type="submit" value="Goodエンディング">
-                        </form>
-                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
-                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                            <input type="hidden" name="result" value="correct2">
-                            <input type="submit" value="Badエンディング">
-                        </form>
-                    {% elif judge.qnum|default(0) == 5 %}
-                        <form method="post" action="/judge" style="display:inline; margin-left: 10px;">
-                            <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                            <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                            <input type="hidden" name="result" value="correct">
-                            <input type="submit" value="大正解">
-                        </form>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No pending judgments.</p>
-    {% endif %}
+    <div class="container my-4">
+        <h1 class="text-center mb-3">判定フォーム</h1>
 
-    <h1>Judgment History</h1>
-    {% if history is defined and history is iterable %}
-        {% for item in history %}
-            <div class="history-item">
-                <p><strong>User ID:</strong> {{ item.user_id|default('Unknown') }}</p>
-                <p><strong>Question Number:</strong> {{ item.qnum|default(0) }}</p>
-                <p><strong>Result:</strong> {{ item.result|default('N/A') }}</p>
-                <img src="{{ item.img_url|default('') }}" alt="History Image" class="image-preview" onerror="this.style.display='none'; alert('Image failed to load.');">
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No judgment history.</p>
-    {% endif %}
+        <h2 class="mb-2">未判定の回答</h2>
+        {% if judges is defined and judges is iterable and judges|length > 0 %}
+            {% for judge in judges %}
+                <div class="judge-card card p-3">
+                    <div class="card-body">
+                        <p><strong>ユーザーID:</strong> {{ judge.user_id|default('Unknown') }}</p>
+                        <p><strong>問題番号:</strong> {{ judge.qnum|default(0) }}</p>
+                        <img src="{{ judge.img_url|default('/static/placeholder.jpg') }}" alt="回答画像" class="image-preview img-fluid mb-2" onerror="this.src='/static/placeholder.jpg';">
+                        <div class="btn-group">
+                            <form method="post" action="/judge">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                <input type="hidden" name="result" value="correct">
+                                <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
+                            </form>
+                            <form method="post" action="/judge">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                <input type="hidden" name="result" value="incorrect">
+                                <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
+                            </form>
+                            {% if judge.qnum|default(0) == 4 %}
+                                <form method="post" action="/judge">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                    <input type="hidden" name="result" value="correct1">
+                                    <button type="submit" class="btn btn-good btn-sm text-white">Goodエンディング</button>
+                                </form>
+                                <form method="post" action="/judge">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                    <input type="hidden" name="result" value="correct2">
+                                    <button type="submit" class="btn btn-bad btn-sm text-white">Badエンディング</button>
+                                </form>
+                            {% elif judge.qnum|default(0) == 5 %}
+                                <form method="post" action="/judge">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                    <input type="hidden" name="result" value="correct">
+                                    <button type="submit" class="btn btn-clear btn-sm text-white">大正解</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-data text-center">未判定の回答はありません。</p>
+        {% endif %}
+        
+        <h2 class="mb-2">判定履歴</h2>
+        {% if history is defined and history is iterable and history|length > 0 %}
+            {% for item in history %}
+                <div class="history-card card p-3">
+                    <div class="card-body">
+                        <p><strong>ユーザーID:</strong> {{ item.user_id|default('Unknown') }}</p>
+                        <p><strong>問題番号:</strong> {{ item.qnum|default(0) }}</p>
+                        <p><strong>結果:</strong> {{ item.result|default('N/A') }}</p>
+                        <img src="{{ item.img_url|default('/static/placeholder.jpg') }}" alt="履歴画像" class="image-preview img-fluid" onerror="this.src='/static/placeholder.jpg';">
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-data text-center">判定履歴はありません。</p>
+        {% endif %}
+    </div>
 </body>
-      </html>
+</html>
