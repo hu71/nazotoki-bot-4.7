@@ -23,9 +23,6 @@
         }
         .btn-correct { background-color: #28a745; border-color: #28a745; }
         .btn-incorrect { background-color: #dc3545; border-color: #dc3545; }
-        .btn-good { background-color: #007bff; border-color: #007bff; }
-        .btn-bad { background-color: #ffc107; border-color: #ffc107; }
-        .btn-clear { background-color: #17a2b8; border-color: #17a2b8; }
         .btn-group form { display: inline-block; margin-right: 0.5rem; }
         .no-data { font-style: italic; color: #6c757d; }
         .container { max-width: 1000px; }
@@ -45,43 +42,17 @@
                         <img src="{{ judge.img_url|default('/static/placeholder.jpg') }}" alt="回答画像" class="image-preview img-fluid mb-2" onerror="this.src='/static/placeholder.jpg';">
                         <div class="btn-group">
                             <form method="post" action="/judge">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
                                 <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                 <input type="hidden" name="result" value="correct">
                                 <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
                             </form>
                             <form method="post" action="/judge">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
                                 <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                 <input type="hidden" name="result" value="incorrect">
                                 <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
                             </form>
-                            {% if judge.qnum|default(0) == 4 %}
-                                <form method="post" action="/judge">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                    <input type="hidden" name="result" value="correct1">
-                                    <button type="submit" class="btn btn-good btn-sm text-white">Goodエンディング</button>
-                                </form>
-                                <form method="post" action="/judge">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                    <input type="hidden" name="result" value="correct2">
-                                    <button type="submit" class="btn btn-bad btn-sm text-white">Badエンディング</button>
-                                </form>
-                            {% elif judge.qnum|default(0) == 5 %}
-                                <form method="post" action="/judge">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                    <input type="hidden" name="result" value="correct">
-                                    <button type="submit" class="btn btn-clear btn-sm text-white">大正解</button>
-                                </form>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
