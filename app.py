@@ -30,10 +30,10 @@ questions = [
             {"text": '''「やっほー！新米探偵さん！」
 「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
 「ここに来てるってことは、君は探偵見習いだよね？」
- 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」''', "delay_seconds": 2},
+ 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」'''},
             {"text": '''「では早速、問題！探偵見習いのテストだよ。
 制限時間は……所長が帰ってくるまでにしましょう。
-困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 2}
+困ったら頭をひっくり返して、最初から考えてみるといいですよ。」'''}
         ],
         "image_url": {"url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_", "delay_seconds": 1},
         "hint_keyword": "hint1",
@@ -48,7 +48,7 @@ questions = [
             「すみません、長々とお待たせしたうえで恐縮ですが……」
             申し訳ないが急用が入ってしまった、 とのことでオサダとの面接は後日ということになった。
             挨拶して事務所を出る、と同時にスマホの通知音が鳴った。
-            「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」''', "delay_seconds": 2},
+            「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」'''},
             {"text": '''ネットサーフィンをしていると一つの記事が目に留まった。
             「特集 オサダ探偵所のシャーロック・ホームズ」
             カエデを取り上げた記事だ。
@@ -57,7 +57,7 @@ questions = [
             「噓ばっかり……【削除済み】」
             一瞬サクラのメッセージが見えた気がしたが瞬きの合間に消えた。
             すぐにいつもの調子でサクラが元気に話しかけてくる。
-            「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''', "delay_seconds": 2}
+            「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」'''}
         ],
         "image_url": {"url": "https://drive.google.com/uc?export=view&id=16hDDwLKg7gf367LT32kxUF5rAfThU66S", "delay_seconds": 1},
         "hint_keyword": "hint2",
@@ -85,12 +85,12 @@ questions = [
             オサダからの電話はそう始まった。ようやくまとまった時間を取れるようになったようだ。
             明日の昼からということになった。 直前まで外せない用事があるそうで、 何とかして時間を捻出したと言っていた。それからしばらくして。
             「新米さんは、探偵ってどんな仕事だと思います？」
-            サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。''', "delay_seconds": 2},
+            サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。'''},
             {"text": '''「一つだけ、サクラからアドバイスがあります。探偵としての心構えについて」
             「探偵というのは、悪い仕事です」
             「探偵は人の真実を暴きます。正義のために。それが常にいいことという保証はない、そこを理解しないといけないと、私は思っています」
             そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。
-            「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 2}
+            「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」'''}
         ],
         "image_url": {"url": "https://drive.google.com/uc?export=view&id=1tmzcdvKHBUBvggOfv-gj-P0w7FdoZeWw", "delay_seconds": 1},
         "hint_keyword": "hint4",
@@ -108,7 +108,7 @@ questions = [
             {"text": '''次のメッセージまでには間があった。メッセージを送る時に深呼吸を挟んだような、そんなわずかな間が。
             「これで私の役目は終わりです。でも、一つだけわがままを聞いてください。最後の問題です。」
             そう言ってサクラは、たった一言質問した。
-            「私は、誰ですか？」''', "delay_seconds": 2}
+            「私は、誰ですか？」'''}
         ],
         "image_url": {"url": "https://drive.google.com/uc?export=view&id=1lUYDFR6pVpyZxCB4JC2pkxS8dYZXZlT8", "delay_seconds": 1},
         "hint_keyword": "hint5",
@@ -120,7 +120,7 @@ questions = [
             ならば、行くべき場所は分かり切っている。
             電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。
             「正解だよ、新米君」そう言って病室の主、カエデは笑った。
-            「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 2}
+            「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」'''}
         ],
         "bad_end_story": [
             {"text": "→『BAD END』", "delay_seconds": 1},
@@ -129,7 +129,7 @@ questions = [
             事務所までの電車に乗っている最中。車内に衝撃的なニュースが流れていた。
             「名探偵カエデ 死亡」数時間前入院している病室に何者かが侵入し、銃で撃たれ殺されたらしい。
             事務所に着いた時、オサダは沈痛とした表情を浮かべていた。オサダはカエデへの哀悼の言葉を口にした後、事務的に面接を始めた。
-            面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。''', "delay_seconds": 2}
+            面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。'''}
         ]
     }
 ]
@@ -146,12 +146,10 @@ def send_content(user_id, content_type, content_data):
             q = content_data
             for story_msg in q["story_messages"]:
                 line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-                time.sleep(story_msg["delay_seconds"])
             line_bot_api.push_message(
                 user_id,
                 ImageSendMessage(original_content_url=q["image_url"]["url"], preview_image_url=q["image_url"]["url"])
             )
-            time.sleep(q["image_url"]["delay_seconds"])
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] == 1:  # 第2問の場合
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってね！"))
             else:
@@ -159,7 +157,6 @@ def send_content(user_id, content_type, content_data):
         elif content_type == "end_story":
             for story_msg in content_data:
                 line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-                time.sleep(story_msg["delay_seconds"])
             line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
     except LineBotApiError as e:
         print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
