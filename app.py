@@ -1,7 +1,7 @@
 import os
 import time
 import uuid
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, make_response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, ImageMessage
@@ -135,8 +135,9 @@ questions = [
 
 # ==== ユーザーごとの進行状況と回答 ====
 user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool}}
-pending_judges = []     # [{"user_id": str, "qnum": int, "img_url": str}]
-judged_history = []     # [{"user_id": str, "qnum": int, "img_url": str, "result": str}]
+pending_judges = []  # [{"user_id": str, "qnum": int, "img_url": str, "token": str}]
+judged_history = []  # [{"user_id": str, "qnum": int, "img_url": str, "result": str, "token": str}]
+used_tokens = set()  # 使用済みトークンを追跡
 
 # ==== 関数: 問題またはストーリーを送信 ====
 def send_content(user_id, content_type, content_data):
@@ -228,7 +229,7 @@ def handle_text(event):
                 send_question(user_id, user_states[user_id]["current_q"])
                 return
             elif qnum == 4 and text.lower() in q["correct_answer"]:  # 第5問の正解1/2
-                user_states[user_id]["game_cleared"] = True  # ゲームクリア状態をTrueに
+                user_states[user_id]["game_cleared"] = True
                 if text.lower() == q["correct_answer"][0]:  # カエデ → Goodエンド
                     send_content(user_id, "end_story", q["good_end_story"])
                 elif text.lower() == q["correct_answer"][1]:  # サクラ → Badエンド
@@ -257,7 +258,7 @@ def handle_image(event):
 
     qnum = user_states[user_id]["current_q"]
 
-    if qnum != 1:  
+    if qnum != 1:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="この問題はテキストで解答してください。"))
         return
 
@@ -265,7 +266,6 @@ def handle_image(event):
         print(f"Fetching image for user {user_id}, question {qnum}")
         message_content = line_bot_api.get_message_content(event.message.id)
         
-        # 一意のファイル名を生成
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
         temp_path = f"/tmp/{unique_filename}"
         os.makedirs("/tmp", exist_ok=True)
@@ -277,21 +277,20 @@ def handle_image(event):
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：画像を保存できませんでした。"))
             return
 
-        # 静的フォルダにコピー
         static_path = os.path.join(app.static_folder, unique_filename)
         with open(static_path, "wb") as f:
             with open(temp_path, "rb") as temp_f:
                 f.write(temp_f.read())
 
-        # ホストURLを安全に取得
         host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://nazotoki-bot-4-7-2.onrender.com")
         img_url = f"{host_url.rstrip('/')}/static/{unique_filename}"
-        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url})
+        token = str(uuid.uuid4())  # 一意のトークンを生成
+        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url, "token": token})
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
 
     except LineBotApiError as e:
-        print(f"LineBotApi error: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}, Error details: {getattr(e, 'error_details', 'N/A')}")
+        print(f"LineBotApi error: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：API接続に失敗しました。"))
     except PermissionError as pe:
         print(f"Permission error: {str(pe)}")
@@ -306,20 +305,25 @@ def handle_image(event):
 # ==== 判定フォーム ====
 @app.route("/judge", methods=["GET", "POST"])
 def judge():
-    global pending_judges, judged_history
+    global pending_judges, judged_history, used_tokens
 
     if request.method == "POST":
         user_id = request.form.get("user_id")
         qnum = request.form.get("qnum")
         result = request.form.get("result")
+        token = request.form.get("token")  # トークンを取得
 
-        # POSTデータが全て揃っていて、pending_judgesに該当データがある場合のみ処理
-        if user_id and qnum and result:
+        # トークンが使用済みかチェック
+        if token in used_tokens:
+            print(f"Duplicate request detected for token: {token}")
+            return "Duplicate request", 400
+
+        if user_id and qnum and result and token:
             try:
                 qnum = int(qnum)
-                # 対応するpending_judgesエントリが存在するか確認
-                judge_to_process = next((j for j in pending_judges if j["user_id"] == user_id and j["qnum"] == qnum), None)
+                judge_to_process = next((j for j in pending_judges if j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token), None)
                 if judge_to_process:
+                    used_tokens.add(token)  # トークンを使用済みに
                     if result == "correct":
                         line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                         if user_id in user_states:
@@ -332,9 +336,10 @@ def judge():
                         "user_id": user_id,
                         "qnum": qnum,
                         "img_url": judge_to_process["img_url"],
-                        "result": result
+                        "result": result,
+                        "token": token
                     })
-                    pending_judges = [j for j in pending_judges if not (j["user_id"] == user_id and j["qnum"] == qnum)]
+                    pending_judges = [j for j in pending_judges if not (j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token)]
             except LineBotApiError as e:
                 print(f"Failed to send result to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
                 return "API error", 500
@@ -342,7 +347,9 @@ def judge():
                 print(f"Invalid qnum: {qnum}")
                 return "Invalid data", 400
 
-    return render_template("judge.html", judges=pending_judges, history=judged_history)
+    response = make_response(render_template("judge.html", judges=pending_judges, history=judged_history))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
