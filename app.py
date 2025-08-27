@@ -28,17 +28,17 @@ questions = [
     {
         "story_messages": [
             {"text": '''「やっほー！新米探偵さん！」
-            「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
-            「ここに来てるってことは、君は探偵見習いだよね？」
-            「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」''', "delay_seconds": 2},
+「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
+「ここに来てるってことは、君は探偵見習いだよね？」
+ 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」''', "delay_seconds": 2},
             {"text": '''「では早速、問題！探偵見習いのテストだよ。
-            制限時間は……所長が帰ってくるまでにしましょう。
-            困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 2}
+制限時間は……所長が帰ってくるまでにしましょう。
+困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 2}
         ],
         "image_url": {"url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_", "delay_seconds": 1},
         "hint_keyword": "hint1",
         "hint_text": "第1問のヒントです",
-        "correct_answer": "correct1"
+        "correct_answer": "たんてい"
     },
     {
         "story_messages": [
