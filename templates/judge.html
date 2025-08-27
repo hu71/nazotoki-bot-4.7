@@ -101,6 +101,7 @@
                                     <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                     <input type="hidden" name="result" value="correct">
                                     <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                    <input type="hidden" name="img_url" value="{{ judge.img_url|default('/static/placeholder.jpg') }}"> <!--追加 -->
                                     <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
                                 </form>
                                 <form class="judge-form" method="post" action="/judge">
@@ -108,6 +109,7 @@
                                     <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                     <input type="hidden" name="result" value="incorrect">
                                     <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                    <input type="hidden" name="img_url" value="{{ judge.img_url|default('/static/placeholder.jpg') }}"> <!--追加 -->
                                     <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
                                 </form>
                             </div>
