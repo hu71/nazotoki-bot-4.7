@@ -27,11 +27,64 @@
         .no-data { font-style: italic; color: #6c757d; }
         .container { max-width: 1000px; }
         .btn-disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-left: 10px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #6c757d; /
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .toggle-label {
+            display: inline-block;
+            vertical-align: middle;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container my-4">
         <h1 class="text-center mb-3">判定フォーム</h1>
+        <div class="mb-3">
+            <span class="toggle-label">常時リクエスト: </span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-polling" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
 
         <h2 class="mb-2">未判定の回答</h2>
         <div id="pending-judges">
@@ -86,21 +139,21 @@
     </div>
 
     <script>
-        // 送信中のフォームを追跡するセット
+        
         const submittingForms = new Set();
+        let pollingInterval = null;
 
-        // フォーム送信時の処理
         function bindFormEvents() {
             document.querySelectorAll('.judge-form').forEach(form => {
                 const judgeId = form.closest('.judge-card').getAttribute('data-judge-id');
-                // 送信中のフォームはボタンを無効化
+                
                 if (submittingForms.has(judgeId)) {
                     form.querySelectorAll('button').forEach(button => {
                         button.disabled = true;
                         button.classList.add('btn-disabled');
                     });
                 } else {
-                    // 新しいフォームにイベントリスナーを追加
+                   
                     form.addEventListener('submit', function(event) {
                         if (submittingForms.has(judgeId)) {
                             event.preventDefault();
@@ -116,7 +169,6 @@
             });
         }
 
-        // ポーリング関数
         function pollJudges() {
             fetch('/judge', {
                 method: 'GET',
@@ -129,13 +181,10 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
                 
-                // 未判定の回答セクションを更新
                 document.querySelector('#pending-judges').innerHTML = doc.querySelector('#pending-judges').innerHTML;
                 
-                // 判定履歴セクションを更新
                 document.querySelector('#judged-history').innerHTML = doc.querySelector('#judged-history').innerHTML;
 
-                // フォームイベントを再設定
                 bindFormEvents();
             })
             .catch(error => {
@@ -143,12 +192,35 @@
             });
         }
 
-        // 初期フォームイベントの設定
+        // ポーリング開始
+        function startPolling() {
+            pollingInterval = setInterval(pollJudges, 5000);
+            const toggleInput = document.getElementById('toggle-polling');
+            toggleInput.checked = true;
+        }
+
+        // ポーリング停止
+        function stopPolling() {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            const toggleInput = document.getElementById('toggle-polling');
+            toggleInput.checked = false;
+        }
+
+        document.getElementById('toggle-polling').addEventListener('change', () => {
+            if (document.getElementById('toggle-polling').checked) {
+                startPolling();
+                pollJudges(); 
+            } else {
+                stopPolling();
+            }
+        });
+
         bindFormEvents();
 
-        // 5秒ごとにポーリング
-        setInterval(pollJudges, 5000);
-        pollJudges(); // 初回実行
+        // 初期ポーリング開始
+        startPolling();
+        pollJudges();
     </script>
 </body>
 </html>
