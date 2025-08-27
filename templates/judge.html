@@ -26,6 +26,7 @@
         .btn-group form { display: inline-block; margin-right: 0.5rem; }
         .no-data { font-style: italic; color: #6c757d; }
         .container { max-width: 1000px; }
+        .btn-disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -33,49 +34,121 @@
         <h1 class="text-center mb-3">判定フォーム</h1>
 
         <h2 class="mb-2">未判定の回答</h2>
-        {% if judges is defined and judges is iterable and judges|length > 0 %}
-            {% for judge in judges %}
-                <div class="judge-card card p-3">
-                    <div class="card-body">
-                        <p><strong>ユーザーID:</strong> {{ judge.user_id|default('Unknown') }}</p>
-                        <p><strong>問題番号:</strong> {{ judge.qnum|default(0) }}</p>
-                        <img src="{{ judge.img_url|default('/static/placeholder.jpg') }}" alt="回答画像" class="image-preview img-fluid mb-2" onerror="this.src='/static/placeholder.jpg';">
-                        <div class="btn-group">
-                            <form method="post" action="/judge">
-                                <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                <input type="hidden" name="result" value="correct">
-                                <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
-                            </form>
-                            <form method="post" action="/judge">
-                                <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                <input type="hidden" name="result" value="incorrect">
-                                <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
-                            </form>
+        <div id="pending-judges">
+            {% if judges is defined and judges is iterable and judges|length > 0 %}
+                {% for judge in judges %}
+                    <div class="judge-card card p-3" data-judge-id="{{ judge.user_id }}-{{ judge.qnum }}-{{ judge.token }}">
+                        <div class="card-body">
+                            <p><strong>ユーザーID:</strong> {{ judge.user_id|default('Unknown') }}</p>
+                            <p><strong>問題番号:</strong> {{ judge.qnum|default(0) }}</p>
+                            <img src="{{ judge.img_url|default('/static/placeholder.jpg') }}" alt="回答画像" class="image-preview img-fluid mb-2" onerror="this.src='/static/placeholder.jpg';">
+                            <div class="btn-group">
+                                <form class="judge-form" method="post" action="/judge">
+                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                    <input type="hidden" name="result" value="correct">
+                                    <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                    <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
+                                </form>
+                                <form class="judge-form" method="post" action="/judge">
+                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                    <input type="hidden" name="result" value="incorrect">
+                                    <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                    <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-data text-center">未判定の回答はありません。</p>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="no-data text-center">未判定の回答はありません。</p>
+            {% endif %}
+        </div>
         
         <h2 class="mb-2">判定履歴</h2>
-        {% if history is defined and history is iterable and history|length > 0 %}
-            {% for item in history %}
-                <div class="history-card card p-3">
-                    <div class="card-body">
-                        <p><strong>ユーザーID:</strong> {{ item.user_id|default('Unknown') }}</p>
-                        <p><strong>問題番号:</strong> {{ item.qnum|default(0) }}</p>
-                        <p><strong>結果:</strong> {{ item.result|default('N/A') }}</p>
-                        <img src="{{ item.img_url|default('/static/placeholder.jpg') }}" alt="履歴画像" class="image-preview img-fluid" onerror="this.src='/static/placeholder.jpg';">
+        <div id="judged-history">
+            {% if history is defined and history is iterable and history|length > 0 %}
+                {% for item in history %}
+                    <div class="history-card card p-3">
+                        <div class="card-body">
+                            <p><strong>ユーザーID:</strong> {{ item.user_id|default('Unknown') }}</p>
+                            <p><strong>問題番号:</strong> {{ item.qnum|default(0) }}</p>
+                            <p><strong>結果:</strong> {{ item.result|default('N/A') }}</p>
+                            <img src="{{ item.img_url|default('/static/placeholder.jpg') }}" alt="履歴画像" class="image-preview img-fluid" onerror="this.src='/static/placeholder.jpg';">
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-data text-center">判定履歴はありません。</p>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="no-data text-center">判定履歴はありません。</p>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        // 送信中のフォームを追跡するセット
+        const submittingForms = new Set();
+
+        // フォーム送信時の処理
+        function bindFormEvents() {
+            document.querySelectorAll('.judge-form').forEach(form => {
+                const judgeId = form.closest('.judge-card').getAttribute('data-judge-id');
+                // 送信中のフォームはボタンを無効化
+                if (submittingForms.has(judgeId)) {
+                    form.querySelectorAll('button').forEach(button => {
+                        button.disabled = true;
+                        button.classList.add('btn-disabled');
+                    });
+                } else {
+                    // 新しいフォームにイベントリスナーを追加
+                    form.addEventListener('submit', function(event) {
+                        if (submittingForms.has(judgeId)) {
+                            event.preventDefault();
+                            return;
+                        }
+                        submittingForms.add(judgeId);
+                        form.querySelectorAll('button').forEach(button => {
+                            button.disabled = true;
+                            button.classList.add('btn-disabled');
+                        });
+                    });
+                }
+            });
+        }
+
+        // ポーリング関数
+        function pollJudges() {
+            fetch('/judge', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                
+                // 未判定の回答セクションを更新
+                document.querySelector('#pending-judges').innerHTML = doc.querySelector('#pending-judges').innerHTML;
+                
+                // 判定履歴セクションを更新
+                document.querySelector('#judged-history').innerHTML = doc.querySelector('#judged-history').innerHTML;
+
+                // フォームイベントを再設定
+                bindFormEvents();
+            })
+            .catch(error => {
+                console.error('ポーリングエラー:', error);
+            });
+        }
+
+        // 初期フォームイベントの設定
+        bindFormEvents();
+
+        // 5秒ごとにポーリング
+        setInterval(pollJudges, 5000);
+        pollJudges(); // 初回実行
+    </script>
 </body>
 </html>
