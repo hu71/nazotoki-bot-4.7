@@ -7,7 +7,6 @@ from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, ImageMessage
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
-
 # Flaskアプリケーションの設定
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
@@ -283,7 +282,8 @@ def handle_image(event):
     try:
         message_content = line_bot_api.get_message_content(event.message.id)
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
-        file_bytes = message_content.content
+        from io import BytesIO
+        file_bites=BytesIO(message_content.content).read()
 
         # S3にアップロード
         s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes,ContentType='image/jpeg')
@@ -363,7 +363,7 @@ def judge():
             },
             ExpiresIn=432000  # 5日
         )
-        judges_with_urls.append({**j, "presigned_url": presigned_url})
+        judges_with_urls.append({**j, "img_url": presigned_url})
 
 
     response = make_response(render_template("judge.html", judges=judges_with_urls, history=judged_history))
