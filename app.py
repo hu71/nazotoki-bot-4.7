@@ -1,9 +1,10 @@
 import os
+import time
 import uuid
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, ImageMessage
 
 # Flaskアプリケーションの設定
 app = Flask(__name__, static_url_path='/static', static_folder='static')
@@ -26,95 +27,140 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 questions = [
     {
         "story_messages": [
-            {"text": '''「やっほー！新米探偵さん！」「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」「ここに来てるってことは、君は探偵見習いだよね？サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」'''}
+            {"text": '''「やっほー！新米探偵さん！」
+            「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」
+            「ここに来てるってことは、君は探偵見習いだよね？」
+            「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」''', "delay_seconds": 2}
+            {"text": '''「では早速、問題！探偵見習いのテストだよ。
+            制限時間は……所長が帰ってくるまでにしましょう。
+            困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 2}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_"},
+        "image_url": {"url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_", "delay_seconds": 1},
         "hint_keyword": "hint1",
-        "hint_text": "第1問のヒント",
+        "hint_text": "第1問のヒントです",
         "correct_answer": "correct1"
     },
     {
         "story_messages": [
-            {"text": '''「ご名答、です！やっぱりオサダ探偵事務所の一員たるもの、英語くらいできませんとね！さすが、サクラが見込んだだけありました！」「ではでは新米さん。次の……いや、もう時間みたいですね」サクラが画面からフェードアウトするのと所長室の扉が開くのはほぼ同時だった。「すみません、長々とお待たせしたうえで恐縮ですが……」申し訳ないが急用が入ってしまった、 とのことでオサダとの面接は後日ということになった。挨拶して事務所を出る、と同時にスマホの通知音が鳴った。「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」'''},
-            {"text": '''ネットサーフィンをしていると一つの記事が目に留まった。「特集 オサダ探偵所のシャーロック・ホームズ」カエデを取り上げた記事だ。【明治時代からの貴族の令嬢】【大学を飛び級で首席卒業】といった肩書の中にこれまで解決した事件の難解さと鮮やかな手際が事細かに書かれている。圧倒されるほどの輝かしい経歴を眺めていると、「噓ばっかり……【削除済み】」一瞬サクラのメッセージが見えた気がしたが瞬きの合間に消えた。すぐにいつもの調子でサクラが元気に話しかけてくる。「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」'''}
+            {"text": '''「ご名答、です！やっぱりオサダ探偵事務所の一員たるもの、英語くらいできませんとね！さすが、サクラが見込んだだけありました！」
+            「ではでは新米さん。次の……いや、もう時間みたいですね」
+            サクラが画面からフェードアウトするのと所長室の扉が開くのはほぼ同時だった。
+            「すみません、長々とお待たせしたうえで恐縮ですが……」
+            申し訳ないが急用が入ってしまった、 とのことでオサダとの面接は後日ということになった。
+            挨拶して事務所を出る、と同時にスマホの通知音が鳴った。
+            「お疲れ様です！面接までの間もサクラがみっちり育ててあげますからね！優秀なあなたをサクラが鍛えたら 120%受かりますから！帰ってから問題三昧です、覚悟しておいてくださいね！」
+            {"text": '''ネットサーフィンをしていると一つの記事が目に留まった。
+            「特集 オサダ探偵所のシャーロック・ホームズ」
+            カエデを取り上げた記事だ。
+            【明治時代からの貴族の令嬢】【大学を飛び級で首席卒業】といった肩書の中にこれまで解決した事件の難解さと鮮やかな手際が事細かに書かれている。
+            圧倒されるほどの輝かしい経歴を眺めていると
+            「噓ばっかり……【削除済み】」
+            一瞬サクラのメッセージが見えた気がしたが瞬きの合間に消えた。
+            すぐにいつもの調子でサクラが元気に話しかけてくる。
+            「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」", "delay_seconds": 2}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=16hDDwLKg7gf367LT32kxUF5rAfThU66S"},
+        "image_url": {"url": "https://drive.google.com/uc?export=view&id=16hDDwLKg7gf367LT32kxUF5rAfThU66S", "delay_seconds": 1},
         "hint_keyword": "hint2",
-        "hint_text": "第2問のヒント",
+        "hint_text": "第2問のヒントです",
         "correct_answer": "correct2"
     },
     {
         "story_messages": [
-            {"text": '''「ご名答、です！ マッチポンプ、盗みの予告状を自分の下に出したり、難事件を紐解くとかなりあるんですよねー。探偵カエデの解決した事件にもそんな事件がいくつかあったらしいですよ？例えば……」'''},
-            {"text": '''またしてもサクラが勝手に喋り出す。「ノックスの十戒って知ってますか？推理小説が守るべきルールのことで謎解きをフェアにするためにあるんです。最近は守られないことも多いですけどね」「実際の事件はもっとつまらなかったりしますよ。センセーショナルな難事件よりも単な通り魔の犯行なんかの方がよっぽど多い。そんな事件には『名探偵』も形無しです」いつも陽気なサクラにしては珍しく毒づくようなことを言う。「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」おもむろにサクラはいつもの調子を取り戻した。'''}
+            {"text": '''「ご名答、です！ マッチポンプ、盗みの予告状を自分の下に出したり、難事件を紐解くとかなりあるんですよねー。探偵カエデの解決した事件にもそんな事件がいくつかあったらしいですよ？例えば……」
+            またしてもサクラが勝手に喋り出す。
+          「ノックスの十戒って知ってますか？推理小説が守るべきルールのことで謎解きをフェアにするためにあるんです。最近は守られないことも多いですけどね」
+          「実際の事件はもっとつまらなかったりしますよ。センセーショナルな難事件よりも単な通り魔の犯行なんかの方がよっぽど多い。そんな事件には『名探偵』も形無しです」
+          いつも陽気なサクラにしては珍しく毒づくようなことを言う。''', "delay_seconds": 2},
+            {"text": "「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」", "delay_seconds": 2}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=12D6c3LtrlXnuUcmc4vNxPq-aLeUw3Ukd"},
+        "image_url": {"url": "https://drive.google.com/uc?export=view&id=12D6c3LtrlXnuUcmc4vNxPq-aLeUw3Ukd", "delay_seconds": 1},
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒント",
+        "hint_text": "第3問のヒントです",
         "correct_answer": "correct3"
     },
     {
         "story_messages": [
-            {"text": '''「正解です！ 事故死と言っても、探偵は事故で呼ばれたりはしませんからねー。基本的には縁がないものです。殺人事件に思われたが実は事故だった、事故と思われたけど実は殺人だった、みたいな話はちらほらありますけどね」'''},
-            {"text": '''「お待たせして申し訳ありません」 オサダからの電話はそう始まった。ようやくまとまった時間を取れるようになったようだ。明日の昼からということになった。 直前まで外せない用事があるそうで、 何とかして時間を捻出したと言っていた。それからしばらくして。「新米さんは、探偵ってどんな仕事だと思います？」サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。「一つだけ、サクラからアドバイスがあります。探偵としての心構えについて」「探偵というのは、悪い仕事です」「探偵は人の真実を暴きます。正義のために。それが常にいいことという保証はない、そこを理解しないといけないと、私は思っています」そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」'''}
+            {"text": '''「正解です！ 事故死と言っても、探偵は事故で呼ばれたりはしませんからねー。基本的には縁がないものです。殺人事件に思われたが実は事故だった、事故と思われたけど実は殺人だった、みたいな話はちらほらありますけどね」
+            「お待たせして申し訳ありません」
+            オサダからの電話はそう始まった。ようやくまとまった時間を取れるようになったようだ。
+            明日の昼からということになった。 直前まで外せない用事があるそうで、 何とかして時間を捻出したと言っていた。それからしばらくして。
+            「新米さんは、探偵ってどんな仕事だと思います？」
+            サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。''', "delay_seconds": 2},
+            {"text": '''「一つだけ、サクラからアドバイスがあります。探偵としての心構えについて」
+            「探偵というのは、悪い仕事です」
+            「探偵は人の真実を暴きます。正義のために。それが常にいいことという保証はない、そこを理解しないといけないと、私は思っています」
+            そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。
+            「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 2}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=1tmzcdvKHBUBvggOfv-gj-P0w7FdoZeWw"},
+        "image_url": {"url": "https://drive.google.com/uc?export=view&id=1tmzcdvKHBUBvggOfv-gj-P0w7FdoZeWw", "delay_seconds": 1},
         "hint_keyword": "hint4",
-        "hint_text": "第4問のヒント",
+        "hint_text": "第4問のヒントです",
         "correct_answer": "correct4"
     },
     {
         "story_messages": [
-            {"text": "第5問のストーリー"}
+            {"text": '''「正解です。実際の事件では、いろいろと複雑な関係があったらしいですけどね」
+            妙に淡々とした口調のまま、サクラは解説を終わらせた。
+            そして数日が過ぎ、面接当日になった。
+            「新米さんもいよいよ面接ですか！頑張ってくださいね」
+            サクラから声をかけてくる。
+            「本当ならこれからサクラの出番なんですけど、これまででサクラの仕事は終わったみたいです、免許皆伝というやつですか」", "delay_seconds": 2},
+            {"text": '''次のメッセージまでには間があった。メッセージを送る時に深呼吸を挟んだような、そんなわずかな間が。
+            「これで私の役目は終わりです。でも、一つだけわがままを聞いてください。最後の問題です。」
+            そう言ってサクラは、たった一言質問した。
+            「私は、誰ですか？」''', "delay_seconds": 2}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=XXXXX5"},
+        "image_url": {"url": "https://drive.google.com/uc?export=view&id=1lUYDFR6pVpyZxCB4JC2pkxS8dYZXZlT8", "delay_seconds": 1},
         "hint_keyword": "hint5",
-        "hint_text": "第5問のヒント",
-        "correct_answer": ["correct5a", "correct5b"],
+        "hint_text": "第5問のヒントです",
+        "correct_answer": ["カエデ", "サクラ"],
         "good_end_story": [
-            {"text": "Goodエンドのストーリー"},
-            {"text": "Goodエンドのストーリー"}
+            {"text": "→『GOOD END』", "delay_seconds": 1},
+            {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
+            ならば、行くべき場所は分かり切っている。
+            電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。
+            「正解だよ、新米君」そう言って病室の主、カエデは笑った。
+            「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 2}
         ],
         "bad_end_story": [
-            {"text": "Badエンドのストーリー"},
-            {"text": "Badエンドのストーリー"}
-        ],
-        "common_end_story": [
-            {"text": "共通エンディングのストーリー"},
-            {"text": "共通エンディングのストーリー"}
+            {"text": "→『BAD END』", "delay_seconds": 1},
+            {"text": '''「正解です。流石ですね」
+            そう答えたサクラの返事は、ひどく無機質なものに思えた。その後、サクラが一言も話すことはなかった。
+            事務所までの電車に乗っている最中。車内に衝撃的なニュースが流れていた。
+            「名探偵カエデ 死亡」数時間前入院している病室に何者かが侵入し、銃で撃たれ殺されたらしい。
+            事務所に着いた時、オサダは沈痛とした表情を浮かべていた。オサダはカエデへの哀悼の言葉を口にした後、事務的に面接を始めた。
+            面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。''', "delay_seconds": 2}
         ]
     }
 ]
 
 # ==== ユーザーごとの進行状況と回答 ====
-user_states = {}        # {user_id: {"current_q": int, "answers": [list of answers]}}
+user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool}}
 pending_judges = []     # [{"user_id": str, "qnum": int, "img_url": str}]
 judged_history = []     # [{"user_id": str, "qnum": int, "img_url": str, "result": str}]
 
 # ==== 関数: 問題またはストーリーを送信 ====
-def send_content(user_id, content_type, content_data, next_qnum=None):
+def send_content(user_id, content_type, content_data):
     try:
         if content_type == "question":
             q = content_data
             for story_msg in q["story_messages"]:
                 line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-            line_bot_api.push_message(user_id, ImageSendMessage(
-                original_content_url=q["image_url"]["url"],
-                preview_image_url=q["image_url"]["url"]
-            ))
-            if q["correct_answer"] == "correct2":  # 2問目は画像解答
+                time.sleep(story_msg["delay_seconds"])
+            line_bot_api.push_message(
+                user_id,
+                ImageSendMessage(original_content_url=q["image_url"]["url"], preview_image_url=q["image_url"]["url"])
+            )
+            time.sleep(q["image_url"]["delay_seconds"])
+            if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] == 1:  # 第2問の場合
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってね！"))
             else:
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってね！"))
         elif content_type == "end_story":
             for story_msg in content_data:
                 line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-            if next_qnum is not None:
-                send_question(user_id, next_qnum)
-            elif content_type == "end_story" and "common_end_story" in content_data:
-                for story_msg in content_data["common_end_story"]:
-                    line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
-                line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
+                time.sleep(story_msg["delay_seconds"])
+            line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
     except LineBotApiError as e:
         print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
         raise
@@ -122,8 +168,6 @@ def send_content(user_id, content_type, content_data, next_qnum=None):
 def send_question(user_id, qnum):
     if qnum < len(questions):
         send_content(user_id, "question", questions[qnum])
-    else:
-        line_bot_api.push_message(user_id, TextSendMessage(text="全ての問題が終了しました！"))
 
 # ==== Webhookエンドポイント ====
 @app.route("/callback", methods=["POST"])
@@ -142,19 +186,32 @@ def callback():
         return "Internal server error", 500
     return "OK", 200
 
-# ==== メッセージ受信時の処理 ====
+# ==== メッセージ受信時の処理（テキスト） ====
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text(event):
     user_id = event.source.user_id
     text = event.message.text.strip()
 
+    # ゲーム開始
     if text.lower() == "start":
-        user_states[user_id] = {"current_q": 0, "answers": []}
+        user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False}
         send_question(user_id, 0)
         return
 
+    # ユーザー状態のチェック
     if user_id in user_states:
-        qnum = user_states[user_id]["current_q"]
+        state = user_states[user_id]
+        
+        # ゲームクリア後の場合
+        if state.get("game_cleared", False):
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="もう一度プレイしたい場合にはstartと送ってね")
+            )
+            return
+
+        # 問題処理ロジック
+        qnum = state["current_q"]
         if qnum < len(questions):
             q = questions[qnum]
             if text.lower() == q["hint_keyword"].lower():
@@ -163,32 +220,34 @@ def handle_text(event):
                     TextSendMessage(text=q["hint_text"])
                 )
                 return
-            elif qnum in [0, 2, 3] and text.lower() == q["correct_answer"].lower():  # 1,3,4問目はテキスト解答
+            elif qnum == 1:  # 第2問は画像解答なのでテキストでは不正解
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"画像で解答してください。{q['hint_keyword']}と送ると何かあるかも"))
+                return
+            elif qnum < 4 and text.lower() == q["correct_answer"].lower():  # 1,3,4問目はテキスト解答
                 user_states[user_id]["current_q"] += 1
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！"))
                 send_question(user_id, user_states[user_id]["current_q"])
                 return
             elif qnum == 4 and text.lower() in q["correct_answer"]:  # 第5問の正解1/2
-                if text.lower() == q["correct_answer"][0]:  # correct5a → Goodエンド
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！ Goodエンディング"))
-                    send_content(user_id, "end_story", q)
-                elif text.lower() == q["correct_answer"][1]:  # correct5b → Badエンド
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(text="正解！ Badエンディング"))
-                    send_content(user_id, "end_story", q)
-                return
-            elif qnum == 4 and text.lower() not in q["correct_answer"]:  # 第5問の不正解
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="残念。不正解です。"))
-                send_content(user_id, "end_story", q)
-                return
-            elif qnum == 1:  # 第2問は画像解答なのでテキストでは不正解
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"画像で解答してください。{q['hint_keyword']}と送ると何かあるかも"))
+                user_states[user_id]["game_cleared"] = True  # ゲームクリア状態をTrueに
+                if text.lower() == q["correct_answer"][0]:  # カエデ → Goodエンド
+                    send_content(user_id, "end_story", q["good_end_story"])
+                elif text.lower() == q["correct_answer"][1]:  # サクラ → Badエンド
+                    send_content(user_id, "end_story", q["bad_end_story"])
                 return
             else:  # その他の不正解
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"残念。不正解です。{q['hint_keyword']}と送ると何かあるかも"))
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=f"残念。不正解です。{q['hint_keyword']}と送ると何かあるかも")
+                )
                 return
 
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text="メッセージを理解できませんでした。"))
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text="メッセージを理解できませんでした。")
+    )
 
+# ==== 画像メッセージ受信時の処理 ====
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     user_id = event.source.user_id
@@ -199,7 +258,7 @@ def handle_image(event):
 
     qnum = user_states[user_id]["current_q"]
 
-    if qnum != 1:  # 第2問以外は画像解答を受け付けない
+    if qnum != 1:  
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="この問題はテキストで解答してください。"))
         return
 
