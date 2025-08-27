@@ -59,7 +59,7 @@ questions = [
             すぐにいつもの調子でサクラが元気に話しかけてくる。
             「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=16hDDwLKg7gf367LT32kxUF5rAfThU66S", "delay_seconds": 1},
+        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question2.jpg", "delay_seconds": 1},
         "hint_keyword": "hint2",
         "hint_text": "第2問のヒントです",
         "correct_answer": "correct2"
@@ -73,7 +73,7 @@ questions = [
           いつも陽気なサクラにしては珍しく毒づくようなことを言う。''', "delay_seconds": 2},
             {"text": "「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」", "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=12D6c3LtrlXnuUcmc4vNxPq-aLeUw3Ukd", "delay_seconds": 1},
+        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "hint3",
         "hint_text": "第3問のヒントです",
         "correct_answer": "correct3"
@@ -92,7 +92,7 @@ questions = [
             そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。
             「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=1tmzcdvKHBUBvggOfv-gj-P0w7FdoZeWw", "delay_seconds": 1},
+        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question4.jpg", "delay_seconds": 1},
         "hint_keyword": "hint4",
         "hint_text": "第4問のヒントです",
         "correct_answer": "correct4"
@@ -110,7 +110,7 @@ questions = [
             そう言ってサクラは、たった一言質問した。
             「私は、誰ですか？」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=1lUYDFR6pVpyZxCB4JC2pkxS8dYZXZlT8", "delay_seconds": 1},
+        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question5.jpg", "delay_seconds": 1},
         "hint_keyword": "hint5",
         "hint_text": "第5問のヒントです",
         "correct_answer": ["カエデ", "サクラ"],
