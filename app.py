@@ -5,6 +5,8 @@ from flask import Flask, request, render_template, make_response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, ImageMessage
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 
 # Flaskアプリケーションの設定
 app = Flask(__name__, static_url_path='/static', static_folder='static')
@@ -22,6 +24,23 @@ except LineBotApiError as e:
     raise ValueError(f"Invalid LINE_CHANNEL_ACCESS_TOKEN: {str(e)}")
 
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
+
+# ==== AWS S3設定 ====  # 
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
+AWS_S3_REGION = os.environ.get("AWS_S3_REGION", "us-east-1")
+
+if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_BUCKET_NAME:
+    raise ValueError("AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME must be set in environment variables.")
+
+# S3クライアント作成
+s3_client = boto3.client(
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_S3_REGION
+)
 
 # ==== 謎の問題データ ====
 questions = [
@@ -247,45 +266,31 @@ def handle_text(event):
         TextSendMessage(text="メッセージを理解できませんでした。")
     )
 
-# ==== 画像メッセージ受信時の処理 ====
+# ==== 画像メッセージ処理（S3アップロード対応） ==== 
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     user_id = event.source.user_id
 
     if user_id not in user_states:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="まずは『start』と送って始めてね！"))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="まずはstartと送って始めてね"))
         return
 
     qnum = user_states[user_id]["current_q"]
-
     if qnum != 1:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="この問題はテキストで解答してください。"))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="この問題はテキストで解答してください"))
         return
 
     try:
-        print(f"Fetching image for user {user_id}, question {qnum}")
         message_content = line_bot_api.get_message_content(event.message.id)
-        
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
-        temp_path = f"/tmp/{unique_filename}"
-        os.makedirs("/tmp", exist_ok=True)
-        with open(temp_path, "wb") as f:
-            for chunk in message_content.iter_content(chunk_size=1024):
-                f.write(chunk)
+        file_bytes = b"".join([chunk for chunk in message_content.iter_content(chunk_size=1024)])
 
-        if not os.path.exists(temp_path):
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：画像を保存できませんでした。"))
-            return
+        # S3にアップロード
+        s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes, ACL='public-read', ContentType='image/jpeg')
+        s3_url = f"https://{AWS_S3_BUCKET_NAME}.s3.{AWS_S3_REGION}.amazonaws.com/{unique_filename}"
 
-        static_path = os.path.join(app.static_folder, unique_filename)
-        with open(static_path, "wb") as f:
-            with open(temp_path, "rb") as temp_f:
-                f.write(temp_f.read())
-
-        host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://nazotoki-bot-4-7-2.onrender.com")
-        img_url = f"{host_url.rstrip('/')}/static/{unique_filename}"
-        token = str(uuid.uuid4()) 
-        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url, "token": token})
+        token = str(uuid.uuid4())
+        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token})
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
 
