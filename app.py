@@ -283,7 +283,7 @@ def handle_image(event):
     try:
         message_content = line_bot_api.get_message_content(event.message.id)
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
-        file_bytes = b"".join([chunk for chunk in message_content.iter_content(chunk_size=1024)])
+        file_bytes = message_content.content
 
         # S3にアップロード
         s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes,ContentType='image/jpeg')
