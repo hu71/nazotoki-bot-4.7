@@ -92,7 +92,7 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒントです",
+        "hint_text": "365 きょねん←ことし→らいねん",
         "correct_answer": "correct3"
     },
     {
