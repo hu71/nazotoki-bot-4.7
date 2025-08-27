@@ -35,7 +35,7 @@ questions = [
 制限時間は……所長が帰ってくるまでにしましょう。
 困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://drive.google.com/uc?export=view&id=17HLOeJgb6cPCMZfVlBKRUYs67wqZOEY_", "delay_seconds": 1},
+        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question1.jpg", "delay_seconds": 1},
         "hint_keyword": "hint1",
         "hint_text": "第1問のヒントです",
         "correct_answer": "たんてい"
