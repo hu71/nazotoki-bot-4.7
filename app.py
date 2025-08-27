@@ -290,7 +290,7 @@ def handle_image(event):
         s3_url = f"https://{AWS_S3_BUCKET_NAME}.s3.{AWS_S3_REGION}.amazonaws.com/{unique_filename}"
 
         token = str(uuid.uuid4())
-        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token})
+        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token,"s3_key":unique_filename})
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
 
@@ -359,7 +359,7 @@ def judge():
             'get_object',
             Params={
                 'Bucket': AWS_S3_BUCKET_NAME,
-                'Key': j['filename']  # S3のファイル名を指定
+                'Key': j['s3_key']  # S3のファイル名を指定
             },
             ExpiresIn=432000  # 5日
         )
