@@ -286,7 +286,7 @@ def handle_image(event):
         file_bytes = b"".join([chunk for chunk in message_content.iter_content(chunk_size=1024)])
 
         # S3にアップロード
-        s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes, ACL='public-read', ContentType='image/jpeg')
+        s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes,ContentType='image/jpeg')
         s3_url = f"https://{AWS_S3_BUCKET_NAME}.s3.{AWS_S3_REGION}.amazonaws.com/{unique_filename}"
 
         token = str(uuid.uuid4())
