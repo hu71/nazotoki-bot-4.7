@@ -317,6 +317,7 @@ def judge():
         qnum = request.form.get("qnum")
         result = request.form.get("result")
         token = request.form.get("token")
+        img_url=request.form.get("img_url","/static/placeholder.jpg")
 
         if token in used_tokens:
             print(f"Duplicate request detected for token: {token}")
@@ -339,7 +340,7 @@ def judge():
                     judged_history.append({
                         "user_id": user_id,
                         "qnum": qnum,
-                        "img_url": judge_to_process["img_url"],
+                        "img_url": img_url,
                         "result": result,
                         "token": token
                     })
