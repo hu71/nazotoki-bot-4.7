@@ -366,7 +366,7 @@ def judge():
         judges_with_urls.append({**j, "presigned_url": presigned_url})
 
 
-    response = make_response(render_template("judge.html", judges=pending_judges, history=judged_history))
+    response = make_response(render_template("judge.html", judges=judges_with_urls, history=judged_history))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
 
