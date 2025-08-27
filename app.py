@@ -350,6 +350,20 @@ def judge():
             except ValueError:
                 print(f"Invalid qnum: {qnum}")
                 return "Invalid data", 400
+                
+    # ==== 修正: presigned URL 生成（有効期限5日=432000秒）====
+    judges_with_urls = []
+    for j in pending_judges:
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': AWS_S3_BUCKET_NAME,
+                'Key': j['filename']  # S3のファイル名を指定
+            },
+            ExpiresIn=432000  # 5日
+        )
+        judges_with_urls.append({**j, "presigned_url": presigned_url})
+
 
     response = make_response(render_template("judge.html", judges=pending_judges, history=judged_history))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
