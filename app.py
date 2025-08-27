@@ -284,7 +284,7 @@ def handle_image(event):
 
         host_url = request.host_url if request.host_url else os.environ.get("RENDER_EXTERNAL_URL", "https://nazotoki-bot-4-7-2.onrender.com")
         img_url = f"{host_url.rstrip('/')}/static/{unique_filename}"
-        token = str(uuid.uuid4())  # 一意のトークンを生成
+        token = str(uuid.uuid4()) 
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": img_url, "token": token})
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
@@ -311,9 +311,8 @@ def judge():
         user_id = request.form.get("user_id")
         qnum = request.form.get("qnum")
         result = request.form.get("result")
-        token = request.form.get("token")  # トークンを取得
+        token = request.form.get("token")
 
-        # トークンが使用済みかチェック
         if token in used_tokens:
             print(f"Duplicate request detected for token: {token}")
             return "Duplicate request", 400
@@ -323,7 +322,7 @@ def judge():
                 qnum = int(qnum)
                 judge_to_process = next((j for j in pending_judges if j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token), None)
                 if judge_to_process:
-                    used_tokens.add(token)  # トークンを使用済みに
+                    used_tokens.add(token)
                     if result == "correct":
                         line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                         if user_id in user_states:
