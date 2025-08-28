@@ -1,6 +1,7 @@
 import os
 import time
 import uuid
+import json
 from flask import Flask, request, render_template, make_response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -25,7 +26,7 @@ except LineBotApiError as e:
 
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# ==== AWS S3設定 ====  # 
+# ==== AWS S3設定 ====  
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
@@ -41,6 +42,53 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_S3_REGION
 )
+
+# ==== S3状態保存キー ====
+STATE_FILE_KEY = "app_state.json"
+
+# ==== 状態変数（初期化） ====
+user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool}}
+pending_judges = []  # [{"user_id": str, "qnum": int, "img_url": str, "token": str}]
+judged_history = []  # [{"user_id": str, "qnum": int, "img_url": str, "result": str, "token": str}]
+used_tokens = set()  # 使用済みトークンを追跡
+
+# ==== S3から状態をロード ====
+def load_state_from_s3():
+    global user_states, pending_judges, judged_history, used_tokens
+    try:
+        response = s3_client.get_object(Bucket=AWS_S3_BUCKET_NAME, Key=STATE_FILE_KEY)
+        state_data = json.loads(response['Body'].read().decode('utf-8'))
+        user_states = state_data.get("user_states", {})
+        pending_judges = state_data.get("pending_judges", [])
+        judged_history = state_data.get("judged_history", [])
+        used_tokens = set(state_data.get("used_tokens", []))
+        print("State loaded from S3 successfully.")
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            print("No state file found in S3. Initializing empty state.")
+        else:
+            print(f"Error loading state from S3: {str(e)}")
+    except Exception as e:
+        print(f"Unexpected error loading state: {str(e)}")
+
+# ==== S3に状態を保存 ====
+def save_state_to_s3():
+    state_data = {
+        "user_states": user_states,
+        "pending_judges": pending_judges,
+        "judged_history": judged_history,
+        "used_tokens": list(used_tokens)
+    }
+    try:
+        s3_client.put_object(
+            Bucket=AWS_S3_BUCKET_NAME,
+            Key=STATE_FILE_KEY,
+            Body=json.dumps(state_data, ensure_ascii=False).encode('utf-8'),
+            ContentType='application/json'
+        )
+        print("State saved to S3 successfully.")
+    except Exception as e:
+        print(f"Error saving state to S3: {str(e)}")
 
 # ==== 謎の問題データ ====
 questions = [
@@ -152,12 +200,6 @@ questions = [
     }
 ]
 
-# ==== ユーザーごとの進行状況と回答 ====
-user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool}}
-pending_judges = []  # [{"user_id": str, "qnum": int, "img_url": str, "token": str}]
-judged_history = []  # [{"user_id": str, "qnum": int, "img_url": str, "result": str, "token": str}]
-used_tokens = set()  # 使用済みトークンを追跡
-
 # ==== 関数: 問題またはストーリーを送信 ====
 def send_content(user_id, content_type, content_data):
     try:
@@ -214,6 +256,7 @@ def handle_text(event):
     # ゲーム開始
     if text.lower() == "start":
         user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False}
+        save_state_to_s3()  # 状態変更を保存
         send_question(user_id, 0)
         return
 
@@ -244,14 +287,16 @@ def handle_text(event):
                 return
             elif qnum < 4 and text.lower() == q["correct_answer"].lower():  # 1,3,4問目はテキスト解答
                 user_states[user_id]["current_q"] += 1
+                save_state_to_s3()  # 状態変更を保存
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！"))
                 send_question(user_id, user_states[user_id]["current_q"])
                 return
-            elif qnum == 4 and text.lower() in q["correct_answer"]:  # 第5問の正解1/2
+            elif qnum == 4 and text.lower() in [ans.lower() for ans in q["correct_answer"]]:  # 第5問の正解1/2
                 user_states[user_id]["game_cleared"] = True
-                if text.lower() == q["correct_answer"][0]:  # カエデ → Goodエンド
+                save_state_to_s3()  # 状態変更を保存
+                if text.lower() == q["correct_answer"][0].lower():  # カエデ → Goodエンド
                     send_content(user_id, "end_story", q["good_end_story"])
-                elif text.lower() == q["correct_answer"][1]:  # サクラ → Badエンド
+                elif text.lower() == q["correct_answer"][1].lower():  # サクラ → Badエンド
                     send_content(user_id, "end_story", q["bad_end_story"])
                 return
             else:  # その他の不正解
@@ -291,6 +336,7 @@ def handle_image(event):
 
         token = str(uuid.uuid4())
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token})
+        save_state_to_s3()  # 状態変更を保存
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
 
@@ -344,6 +390,7 @@ def judge():
                         "token": token
                     })
                     pending_judges = [j for j in pending_judges if not (j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token)]
+                    save_state_to_s3()  # 状態変更を保存
             except LineBotApiError as e:
                 print(f"Failed to send result to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
                 return "API error", 500
@@ -356,4 +403,5 @@ def judge():
     return response
 
 if __name__ == "__main__":
+    load_state_from_s3()  # アプリ起動時に状態をロード
     app.run(host="0.0.0.0", port=5000)
