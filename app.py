@@ -107,7 +107,7 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question1.jpg", "delay_seconds": 1},
         "hint_keyword": "hint1",
-        "hint_text": "第1問のヒントです",
+        "hint_text": "",
         "correct_answer": "たんてい"
     },
     {
@@ -130,7 +130,7 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question2.jpg", "delay_seconds": 1},
         "hint_keyword": "hint2",
-        "hint_text": "第2問のヒントです",
+        "hint_text": "「問題文についている矢印に注目してみて」",
         "correct_answer": "correct2"
     },
     {
@@ -144,8 +144,8 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "hint3",
-        "hint_text": "第3問のヒントです",
-        "correct_answer": "correct3"
+        "hint_text": "「［365］←◯⚪︎◯◯←◯◯◯→らいねん→」",
+        "correct_answer": "じこし"
     },
     {
         "story_messages": [
@@ -184,15 +184,15 @@ questions = [
         "hint_text": "第5問のヒントです",
         "correct_answer": ["カエデ", "サクラ"],
         "good_end_story": [
-            {"text": "→『GOOD END』", "delay_seconds": 1},
+            {"text": "→『END A』", "delay_seconds": 1},
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
 ならば、行くべき場所は分かり切っている。
-電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。
-「正解だよ、新米君」そう言って病室の主、カエデは笑った。
+電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
+            {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
 「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
         ],
         "bad_end_story": [
-            {"text": "→『BAD END』", "delay_seconds": 1},
+            {"text": "→『END B』", "delay_seconds": 1},
             {"text": '''「正解です。流石ですね」
             そう答えたサクラの返事は、ひどく無機質なものに思えた。その後、サクラが一言も話すことはなかった。
 事務所までの電車に乗っている最中。車内に衝撃的なニュースが流れていた。
