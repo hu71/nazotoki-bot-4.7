@@ -98,7 +98,7 @@ questions = [
     {
         "story_messages": [
             {"text": '''『第一章』「やっほー！新米探偵さん！」
-「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」''',"delay_seconds": 1},
+「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」''', "delay_seconds": 1},
             {"image_url": "https://zui-xin-ban.onrender.com/static/smartphone.png", "delay_seconds": 1},
             {"text": '''「ここに来てるってことは、君は探偵見習いだよね？」
 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
@@ -179,8 +179,8 @@ questions = [
 「私は、誰ですか？」''', "delay_seconds": 1}
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question5.jpg", "delay_seconds": 1},
-        "hint_keyword": "hint5",
-        "hint_text": "第5問のヒントです",
+        "hint_keyword": "",  # ヒントなし
+        "hint_text": "",  # ヒントなし
         "correct_answer": "image_based",  # 画像ベースの回答
         "good_end_story": [
             {"text": "→『END A』", "delay_seconds": 1},
@@ -189,7 +189,7 @@ questions = [
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
             {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.png", "delay_seconds": 1},
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
-「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
+「そして最終回詐欺だ新米君。本真の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
         ],
         "bad_end_story": [
             {"text": "→『END B』", "delay_seconds": 1},
@@ -199,11 +199,8 @@ questions = [
 「名探偵カエデ 死亡」数時間前入院している病室に何者かが侵入し、銃で撃たれ殺されたらしい。
 事務所に着いた時、オサダは沈痛とした表情を浮かべていた。オサダはカエデへの哀悼の言葉を口にした後、事務的に面接を始めた。
 面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。''', "delay_seconds": 1},
-            {"text": '''『終章』事件は終わった。 カエデを事故死に見せかけて殺そうとした人物、オサダは逮捕され
-た。 オサダ探偵社は事件を作り "名探偵"に解かせるマッチポンプを長らく行っており、
-事実に気づいたカエデを抹殺しようとしたということらしい。
-カエデは探偵を辞めた。 後継者として自分を指名し、 事務所再建の費用として多額の
-振り込みを事務所の口座にした後、いつの間にかいなくなっていた。
+            {"text": '''『終章』事件は終わった。 カエデを事故死に見せかけて殺そうとした人物、オサダは逮捕された。 オサダ探偵社は事件を作り "名探偵"に解かせるマッチポンプを長らく行っており、事実に気づいたカエデを抹殺しようとしたということらしい。
+カエデは探偵を辞めた。 後継者として自分を指名し、 事務所再建の費用として多額の振り込みを事務所の口座にした後、いつの間にかいなくなっていた。
 しばらくして、探偵事務所の活動がやっと軌道に乗り始めたころ。
 事務所のデスクの上に一通の手紙が置いてあった。
 宛名は、カエデから。''', "delay_seconds": 1}
@@ -217,7 +214,16 @@ def send_content(user_id, content_type, content_data):
         if content_type == "question":
             q = content_data
             for story_msg in q["story_messages"]:
-                line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
+                if "text" in story_msg:
+                    line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
+                elif "image_url" in story_msg:
+                    line_bot_api.push_message(
+                        user_id,
+                        ImageSendMessage(
+                            original_content_url=story_msg["image_url"],
+                            preview_image_url=story_msg["image_url"]
+                        )
+                    )
                 time.sleep(story_msg["delay_seconds"])
             line_bot_api.push_message(
                 user_id,
@@ -296,14 +302,14 @@ def handle_text(event):
         qnum = state["current_q"]
         if qnum < len(questions):
             q = questions[qnum]
-            if text.lower() == q["hint_keyword"].lower():
+            if q["hint_keyword"] and text.lower() == q["hint_keyword"].lower():  # ヒントキーワードが空でない場合のみ
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text=q["hint_text"])
                 )
                 return
             elif qnum in [1, 4]:  # 第2問と第5問は画像解答
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"画像で解答してください。{q['hint_keyword']}と送ると何かあるかも"))
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="画像で解答してください。"))
                 return
             elif text.lower() == q["correct_answer"].lower():  # テキスト解答（第1,3,4問目）
                 user_states[user_id]["current_q"] += 1
@@ -314,7 +320,7 @@ def handle_text(event):
             else:  # その他の不正解
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=f"残念。不正解です。{q['hint_keyword']}と送ると何かあるかも")
+                    TextSendMessage(text=f'ブブー、不正解です。もしヒントが欲しければ{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください' or ''}")
                 )
                 return
 
@@ -387,13 +393,12 @@ def judge():
                 if judge_to_process:
                     used_tokens.add(token)
                     if qnum == 4:  # 第5問の場合
-                        user_states[user_id]["game_cleared"] = True
                         if result == "correct":
+                            user_states[user_id]["game_cleared"] = True
                             line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                             send_content(user_id, "end_story", questions[qnum]["good_end_story"])
                         else:
-                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。"))
-                            send_content(user_id, "end_story", questions[qnum]["bad_end_story"])
+                            line_bot_api.push_message(user_id, TextSendMessage(text="別の画像を送ってください。私に辿り着けるかな？"))
                     else:  # 第2問の場合
                         if result == "correct":
                             line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
