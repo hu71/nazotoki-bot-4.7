@@ -182,7 +182,7 @@ questions = [
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question5.jpg", "delay_seconds": 1},
         "hint_keyword": "hint5",
         "hint_text": "第5問のヒントです",
-        "correct_answer": ["カエデ", "サクラ"],
+        "correct_answer": "image_based",  # 画像ベースの回答
         "good_end_story": [
             {"text": "→『END A』", "delay_seconds": 1},
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
@@ -216,7 +216,7 @@ def send_content(user_id, content_type, content_data):
                 ImageSendMessage(original_content_url=q["image_url"]["url"], preview_image_url=q["image_url"]["url"])
             )
             time.sleep(q["image_url"]["delay_seconds"])
-            if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] == 1:  # 第2問の場合
+            if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:  # 第2問と第5問は画像
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってね！"))
             else:
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってね！"))
@@ -285,22 +285,14 @@ def handle_text(event):
                     TextSendMessage(text=q["hint_text"])
                 )
                 return
-            elif qnum == 1:  # 第2問は画像解答なのでテキストでは不正解
+            elif qnum in [1, 4]:  # 第2問と第5問は画像解答
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"画像で解答してください。{q['hint_keyword']}と送ると何かあるかも"))
                 return
-            elif qnum < 4 and text.lower() == q["correct_answer"].lower():  # 1,3,4問目はテキスト解答
+            elif text.lower() == q["correct_answer"].lower():  # テキスト解答（第1,3,4問目）
                 user_states[user_id]["current_q"] += 1
                 save_state_to_s3()  # 状態変更を保存
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！"))
                 send_question(user_id, user_states[user_id]["current_q"])
-                return
-            elif qnum == 4 and text.lower() in [ans.lower() for ans in q["correct_answer"]]:  # 第5問の正解1/2
-                user_states[user_id]["game_cleared"] = True
-                save_state_to_s3()  # 状態変更を保存
-                if text.lower() == q["correct_answer"][0].lower():  # カエデ → Goodエンド
-                    send_content(user_id, "end_story", q["good_end_story"])
-                elif text.lower() == q["correct_answer"][1].lower():  # サクラ → Badエンド
-                    send_content(user_id, "end_story", q["bad_end_story"])
                 return
             else:  # その他の不正解
                 line_bot_api.reply_message(
@@ -324,7 +316,7 @@ def handle_image(event):
         return
 
     qnum = user_states[user_id]["current_q"]
-    if qnum != 1:
+    if qnum not in [1, 4]:  # 第2問と第5問のみ画像解答
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="この問題はテキストで解答してください"))
         return
 
@@ -377,13 +369,22 @@ def judge():
                 judge_to_process = next((j for j in pending_judges if j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token), None)
                 if judge_to_process:
                     used_tokens.add(token)
-                    if result == "correct":
-                        line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
-                        if user_id in user_states:
-                            user_states[user_id]["current_q"] += 1
-                            send_question(user_id, user_states[user_id]["current_q"])
-                    else:
-                        line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                    if qnum == 4:  # 第5問の場合
+                        user_states[user_id]["game_cleared"] = True
+                        if result == "correct":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
+                            send_content(user_id, "end_story", questions[qnum]["good_end_story"])
+                        else:
+                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。"))
+                            send_content(user_id, "end_story", questions[qnum]["bad_end_story"])
+                    else:  # 第2問の場合
+                        if result == "correct":
+                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
+                            if user_id in user_states:
+                                user_states[user_id]["current_q"] += 1
+                                send_question(user_id, user_states[user_id]["current_q"])
+                        else:
+                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
 
                     judged_history.append({
                         "user_id": user_id,
