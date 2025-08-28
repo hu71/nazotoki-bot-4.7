@@ -252,8 +252,8 @@ def send_content(user_id, content_type, content_data):
             line_bot_api.push_message(
                 user_id,
                 ImageSendMessage(
-                    original_content_url="https://zui-xin-ban.onrender.com/static/ending.png",
-                    preview_image_url="https://zui-xin-ban.onrender.com/static/ending.png"
+                    original_content_url="https://zui-xin-ban.onrender.com/static/osada.jpg",
+                    preview_image_url="https://zui-xin-ban.onrender.com/static/osasa.jpg"
                 )
             )
     except LineBotApiError as e:
