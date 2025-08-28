@@ -104,7 +104,7 @@ questions = [
 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
 「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question1.jpg", "delay_seconds": 1},
+        "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question1.jpg", "delay_seconds": 1},
         "hint_keyword": "hint1",
         "hint_text": "「手の本数に着目してみてください」",
         "correct_answer": "たんてい"
@@ -127,7 +127,7 @@ questions = [
 すぐにいつもの調子でサクラが元気に話しかけてくる。
 「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question2.jpg", "delay_seconds": 1},
+        "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question2.jpg", "delay_seconds": 1},
         "hint_keyword": "hint2",
         "hint_text": "「問題文についている矢印に注目してみてください」",
         "correct_answer": "correct2"
@@ -141,7 +141,7 @@ questions = [
 いつも陽気なサクラにしては珍しく毒づくようなことを言う。''', "delay_seconds": 1},
             {"text": "「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」", "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question3.jpg", "delay_seconds": 1},
+        "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "hint3",
         "hint_text": "「［365］←◯⚪︎◯◯←◯◯◯→らいねん→」",
         "correct_answer": "じこし"
@@ -160,7 +160,7 @@ questions = [
  そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。
 「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question4.jpg", "delay_seconds": 1},
+        "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question4.jpg", "delay_seconds": 1},
         "hint_keyword": "hint4",
         "hint_text": "「ミノルは犯人ではないそうですよ」",
         "correct_answer": [
@@ -187,7 +187,7 @@ questions = [
  そう言ってサクラは、たった一言質問した。
 「私は、誰ですか？」''', "delay_seconds": 1}
         ],
-        "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question5.jpg", "delay_seconds": 1},
+        "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question5.jpg", "delay_seconds": 1},
         "hint_keyword": "",  # ヒントなし
         "hint_text": "",  # ヒントなし
         "correct_answer": "image_based",  # 画像ベースの回答
@@ -196,7 +196,7 @@ questions = [
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
 ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
-            {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.jpg", "delay_seconds": 1},
+            {"image_url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/hospital.jpg", "delay_seconds": 1},
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
 「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
         ],
@@ -240,9 +240,9 @@ def send_content(user_id, content_type, content_data):
             )
             time.sleep(q["image_url"]["delay_seconds"])
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:  # 第2問と第5問は画像
-                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるものの写真を送ってください」"))
+                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってください"))
             else:
-                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるテキストを送ってください」"))
+                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってください"))
         elif content_type == "end_story":
             for story_msg in content_data:
                 if "text" in story_msg:
@@ -261,8 +261,8 @@ def send_content(user_id, content_type, content_data):
             line_bot_api.push_message(
                 user_id,
                 ImageSendMessage(
-                    original_content_url="https://zui-xin-ban.onrender.com/static/osada.jpg",
-                    preview_image_url="https://zui-xin-ban.onrender.com/static/osada.jpg"
+                    original_content_url="https://nazotoki-bot-4-7-9hls.onrender.com/static/osada.jpg",
+                    preview_image_url="https://nazotoki-bot-4-7-9hls.onrender.com/static/osada.jpg"
                 )
             )
     except LineBotApiError as e:
@@ -341,7 +341,7 @@ def handle_text(event):
             else:  # その他の不正解
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=f"「ブブー、不正解です。{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください」' or ''}")
+                    TextSendMessage(text=f"「ブブー、不正解です。もしヒントが欲しければ {q['hint_keyword'] and f'{q['hint_keyword']}と送ってください」' or ''}")
                 )
                 return
 
