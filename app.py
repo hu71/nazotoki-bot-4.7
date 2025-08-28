@@ -99,7 +99,7 @@ questions = [
         "story_messages": [
             {"text": '''『第一章』「やっほー！新米探偵さん！」
 「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」''', "delay_seconds": 1},
-            {"image_url": "https://zui-xin-ban.onrender.com/static/smartphone.jpg", "delay_seconds": 1},
+            {"image_url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/smartphone.jpg", "delay_seconds": 1},
             {"text": '''「ここに来てるってことは、君は探偵見習いだよね？」
 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
 「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 1}
