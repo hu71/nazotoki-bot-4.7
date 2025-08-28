@@ -90,6 +90,9 @@ def save_state_to_s3():
     except Exception as e:
         print(f"Error saving state to S3: {str(e)}")
 
+# アプリロード時に状態をロード（Render.com対応）
+load_state_from_s3()
+
 # ==== 謎の問題データ ====
 questions = [
     {
@@ -403,5 +406,4 @@ def judge():
     return response
 
 if __name__ == "__main__":
-    load_state_from_s3()  # アプリ起動時に状態をロード
     app.run(host="0.0.0.0", port=5000)
