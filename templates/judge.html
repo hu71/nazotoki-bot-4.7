@@ -23,6 +23,9 @@
         }
         .btn-correct { background-color: #28a745; border-color: #28a745; }
         .btn-incorrect { background-color: #dc3545; border-color: #dc3545; }
+        .btn-good-end { background-color: #17a2b8; border-color: #17a2b8; }
+        .btn-bad-end { background-color: #6f42c1; border-color: #6f42c1; }
+        .btn-retry { background-color: #007bff; border-color: #007bff; }
         .btn-group form { display: inline-block; margin-right: 0.5rem; }
         .no-data { font-style: italic; color: #6c757d; }
         .container { max-width: 1000px; }
@@ -96,22 +99,44 @@
                             <p><strong>問題番号:</strong> {{ judge.qnum|default(0) }}</p>
                             <img src="{{ judge.img_url|default('/static/placeholder.jpg') }}" alt="回答画像" class="image-preview img-fluid mb-2" onerror="this.src='/static/placeholder.jpg';">
                             <div class="btn-group">
-                                <form class="judge-form" method="post" action="/judge">
-                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                    <input type="hidden" name="result" value="correct">
-                                    <input type="hidden" name="token" value="{{ judge.token|default('') }}">
-                                    <input type="hidden" name="img_url" value="{{ judge.img_url|default('/static/placeholder.jpg') }}"> <!--追加 -->
-                                    <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
-                                </form>
-                                <form class="judge-form" method="post" action="/judge">
-                                    <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
-                                    <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
-                                    <input type="hidden" name="result" value="incorrect">
-                                    <input type="hidden" name="token" value="{{ judge.token|default('') }}">
-                                    <input type="hidden" name="img_url" value="{{ judge.img_url|default('/static/placeholder.jpg') }}"> <!--追加 -->
-                                    <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
-                                </form>
+                                {% if judge.qnum == 1 %}
+                                    <form class="judge-form" method="post" action="/judge">
+                                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                        <input type="hidden" name="result" value="correct">
+                                        <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                        <button type="submit" class="btn btn-correct btn-sm text-white">正解</button>
+                                    </form>
+                                    <form class="judge-form" method="post" action="/judge">
+                                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                        <input type="hidden" name="result" value="incorrect">
+                                        <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                        <button type="submit" class="btn btn-incorrect btn-sm text-white">不正解</button>
+                                    </form>
+                                {% elif judge.qnum == 4 %}
+                                    <form class="judge-form" method="post" action="/judge">
+                                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                        <input type="hidden" name="result" value="good_end">
+                                        <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                        <button type="submit" class="btn btn-good-end btn-sm text-white">グッドエンド</button>
+                                    </form>
+                                    <form class="judge-form" method="post" action="/judge">
+                                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                        <input type="hidden" name="result" value="bad_end">
+                                        <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                        <button type="submit" class="btn btn-bad-end btn-sm text-white">バッドエンド</button>
+                                    </form>
+                                    <form class="judge-form" method="post" action="/judge">
+                                        <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
+                                        <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
+                                        <input type="hidden" name="result" value="retry">
+                                        <input type="hidden" name="token" value="{{ judge.token|default('') }}">
+                                        <button type="submit" class="btn btn-retry btn-sm text-white">もう一度</button>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -141,7 +166,6 @@
     </div>
 
     <script>
-        
         const submittingForms = new Set();
         let pollingInterval = null;
 
@@ -155,7 +179,6 @@
                         button.classList.add('btn-disabled');
                     });
                 } else {
-                   
                     form.addEventListener('submit', function(event) {
                         if (submittingForms.has(judgeId)) {
                             event.preventDefault();
