@@ -188,6 +188,7 @@ questions = [
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
 ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
+            {"image_url": "https://zui-xin-ban.onrender.com/static/good_end_image.jpg", "delay_seconds": 1},  # 画像追加
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
 「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
         ],
@@ -222,7 +223,16 @@ def send_content(user_id, content_type, content_data):
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってね！"))
         elif content_type == "end_story":
             for story_msg in content_data:
-                line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
+                if "text" in story_msg:
+                    line_bot_api.push_message(user_id, TextSendMessage(text=story_msg["text"]))
+                elif "image_url" in story_msg:
+                    line_bot_api.push_message(
+                        user_id,
+                        ImageSendMessage(
+                            original_content_url=story_msg["image_url"],
+                            preview_image_url=story_msg["image_url"]
+                        )
+                    )
                 time.sleep(story_msg["delay_seconds"])
             line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
     except LineBotApiError as e:
