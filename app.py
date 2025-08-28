@@ -162,7 +162,7 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question4.jpg", "delay_seconds": 1},
         "hint_keyword": "hint4",
-        "hint_text": "第4問のヒントです",
+        "hint_text": "「ミノルは犯人ではないそうですよ」",
         "correct_answer": [
             "あおいとひろき",
             "ひろきとあおい",
