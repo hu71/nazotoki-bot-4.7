@@ -167,11 +167,9 @@ questions = [
     },
     {
         "story_messages": [
-            {"text": '''「正解です。実際の事件では、いろいろと複雑な関係があったらしいですけどね」
-妙に淡々とした口調のまま、サクラは解説を終わらせた。
+            {"text": '''「正解です。実際の事件では、いろいろと複雑な関係があったらしいですけどね」妙に淡々とした口調のまま、サクラは解説を終わらせた。
 『第五章』そして数日が過ぎ、面接当日になった。
-「新米さんもいよいよ面接ですか！頑張ってくださいね」
-サクラから声をかけてくる。
+「新米さんもいよいよ面接ですか！頑張ってくださいね」サクラから声をかけてくる。
 「本当ならこれからサクラの出番なんですけど、これまででサクラの仕事は終わったみたいです、免許皆伝というやつですか」''', "delay_seconds": 1},
             {"text": '''次のメッセージまでには間があった。メッセージを送る時に深呼吸を挟んだような、そんなわずかな間が。
 「これで私の役目は終わりです。でも、一つだけわがままを聞いてください。最後の問題です。」
@@ -184,8 +182,7 @@ questions = [
         "correct_answer": "image_based",  # 画像ベースの回答
         "good_end_story": [
             {"text": "→『END A』", "delay_seconds": 1},
-            {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
-ならば、行くべき場所は分かり切っている。
+            {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
             {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.png", "delay_seconds": 1},
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
@@ -231,9 +228,9 @@ def send_content(user_id, content_type, content_data):
             )
             time.sleep(q["image_url"]["delay_seconds"])
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:  # 第2問と第5問は画像
-                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってね！"))
+                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるものの写真を送ってください」"))
             else:
-                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってね！"))
+                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるテキストを送ってね」"))
         elif content_type == "end_story":
             for story_msg in content_data:
                 if "text" in story_msg:
@@ -327,7 +324,7 @@ def handle_text(event):
             else:  # その他の不正解
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=f"ブブー、不正解です。{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください' or ''}")
+                    TextSendMessage(text=f"「ブブー、不正解です。{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください」' or ''}")
                 )
                 return
 
