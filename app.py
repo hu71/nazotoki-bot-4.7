@@ -156,21 +156,32 @@ questions = [
 サクラの問いかけはいつも唐突だ。ただこの時の質問はいつもとは違う気がした。''', "delay_seconds": 1},
             {"text": '''「一つだけ、サクラからアドバイスがあります。探偵としての心構えについて」
 「探偵というのは、悪い仕事です」
-「探偵は人の真実を暴きます。正義のために。それが常にいいことという保証はない、そこを理解しないといけないと、私は思っています」
+「探偵は人の真真実を暴きます。正義のために。それが常にいいことという保証はない、そこを理解しないといけないと、私は思っています」
  そこまで言ったところでサクラは急に口ごもった。しばらくして、何もなかったかのようにサクラが再び口を開いた。
 「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 1}
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question4.jpg", "delay_seconds": 1},
         "hint_keyword": "hint4",
         "hint_text": "第4問のヒントです",
-        "correct_answer": "correct4"
+        "correct_answer": [
+            "あおいとひろき",
+            "ひろきとあおい",
+            "アオイとヒロキ",
+            "ヒロキとアオイ",
+            "あおいとヒロキ",
+            "ヒロキとあおい",
+            "アオイとひろき",
+            "ひろきとアオイ"
+        ]
     },
     {
         "story_messages": [
-            {"text": '''「正解です。実際の事件では、いろいろと複雑な関係があったらしいですけどね」妙に淡々とした口調のまま、サクラは解説を終わらせた。
+            {"text": '''「正解です。実際の事件では、いろいろと複雑な関係があったらしいですけどね」
+妙に淡々とした口調のまま、サクラは解説を終わらせた。
 『第五章』そして数日が過ぎ、面接当日になった。
-「新米さんもいよいよ面接ですか！頑張ってくださいね」サクラから声をかけてくる。
-「本当ならこれからサクラの出番なんですけど、これまででサクラの仕事は終わったみたいです、免許皆伝というやつですか」''', "delay_seconds": 1},
+「新米さんもいよいよ面接ですか！頑張ってくださいね」
+サクラから声をかけてくる。
+「本真ならこれからサクラの出番なんですけど、これまででサクラの仕事は終わったみたいです、免許皆伝というやつですか」''', "delay_seconds": 1},
             {"text": '''次のメッセージまでには間があった。メッセージを送る時に深呼吸を挟んだような、そんなわずかな間が。
 「これで私の役目は終わりです。でも、一つだけわがままを聞いてください。最後の問題です。」
  そう言ってサクラは、たった一言質問した。
@@ -182,7 +193,8 @@ questions = [
         "correct_answer": "image_based",  # 画像ベースの回答
         "good_end_story": [
             {"text": "→『END A』", "delay_seconds": 1},
-            {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。ならば、行くべき場所は分かり切っている。
+            {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。
+ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
             {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.jpg", "delay_seconds": 1},
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
@@ -250,7 +262,7 @@ def send_content(user_id, content_type, content_data):
                 user_id,
                 ImageSendMessage(
                     original_content_url="https://zui-xin-ban.onrender.com/static/osada.jpg",
-                    preview_image_url="https://zui-xin-ban.onrender.com/static/osasa.jpg"
+                    preview_image_url="https://zui-xin-ban.onrender.com/static/osada.jpg"
                 )
             )
     except LineBotApiError as e:
@@ -316,7 +328,12 @@ def handle_text(event):
             elif qnum in [1, 4]:  # 第2問と第5問は画像解答
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text="画像で解答してください。"))
                 return
-            elif text.lower() == q["correct_answer"].lower():  # テキスト解答（第1,3,4問目）
+            elif isinstance(q["correct_answer"], list) and text.lower() in [ans.lower() for ans in q["correct_answer"]]:  # リスト形式の正解判定
+                user_states[user_id]["current_q"] += 1
+                save_state_to_s3()  # 状態変更を保存
+                send_question(user_id, user_states[user_id]["current_q"])
+                return
+            elif isinstance(q["correct_answer"], str) and text.lower() == q["correct_answer"].lower():  # 単一文字列の正解判定
                 user_states[user_id]["current_q"] += 1
                 save_state_to_s3()  # 状態変更を保存
                 send_question(user_id, user_states[user_id]["current_q"])
