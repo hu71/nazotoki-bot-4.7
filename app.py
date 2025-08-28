@@ -15,9 +15,25 @@ app = Flask(__name__, static_url_path='/static', static_folder='static')
 # ==== LINE Bot API設定 ====
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
+AWS_S3_REGION = os.environ.get("AWS_S3_REGION", "us-east-1")
 
-if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_CHANNEL_SECRET:
-    raise ValueError("LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET must be set in environment variables.")
+# 環境変数の検証
+missing_env_vars = []
+if not LINE_CHANNEL_ACCESS_TOKEN:
+    missing_env_vars.append("LINE_CHANNEL_ACCESS_TOKEN")
+if not LINE_CHANNEL_SECRET:
+    missing_env_vars.append("LINE_CHANNEL_SECRET")
+if not AWS_ACCESS_KEY_ID:
+    missing_env_vars.append("AWS_ACCESS_KEY_ID")
+if not AWS_SECRET_ACCESS_KEY:
+    missing_env_vars.append("AWS_SECRET_ACCESS_KEY")
+if not AWS_S3_BUCKET_NAME:
+    missing_env_vars.append("AWS_S3_BUCKET_NAME")
+if missing_env_vars:
+    raise ValueError(f"Missing required environment variables: {', '.join(missing_env_vars)}")
 
 try:
     line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
@@ -26,16 +42,7 @@ except LineBotApiError as e:
 
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# ==== AWS S3設定 ====  
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
-AWS_S3_REGION = os.environ.get("AWS_S3_REGION", "us-east-1")
-
-if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_BUCKET_NAME:
-    raise ValueError("AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME must be set in environment variables.")
-
-# S3クライアント作成
+# ==== AWS S3設定 ====
 s3_client = boto3.client(
     "s3",
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -130,7 +137,7 @@ questions = [
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question2.jpg", "delay_seconds": 1},
         "hint_keyword": "hint2",
         "hint_text": "「問題文についている矢印に注目してみてください」",
-        "correct_answer": "correct2"
+        "correct_answer": "image_based"
     },
     {
         "story_messages": [
@@ -167,11 +174,7 @@ questions = [
             "あおいとひろき",
             "ひろきとあおい",
             "アオイとヒロキ",
-            "ヒロキとアオイ",
-            "あおいとヒロキ",
-            "ヒロキとあおい",
-            "アオイとひろき",
-            "ひろきとアオイ"
+            "ヒロキとアオイ"
         ]
     },
     {
@@ -233,12 +236,12 @@ def send_content(user_id, content_type, content_data):
                             preview_image_url=story_msg["image_url"]
                         )
                     )
-                time.sleep(story_msg["delay_seconds"])
+                time.sleep(story_msg["delay_seconds"] + 1)
             line_bot_api.push_message(
                 user_id,
                 ImageSendMessage(original_content_url=q["image_url"]["url"], preview_image_url=q["image_url"]["url"])
             )
-            time.sleep(q["image_url"]["delay_seconds"])
+            time.sleep(q["image_url"]["delay_seconds"] + 1)
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:  # 第2問と第5問は画像
                 line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってください"))
             else:
@@ -255,9 +258,9 @@ def send_content(user_id, content_type, content_data):
                             preview_image_url=story_msg["image_url"]
                         )
                     )
-                time.sleep(story_msg["delay_seconds"])
+                time.sleep(story_msg["delay_seconds"] + 1)
             line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
-            time.sleep(1)  # メッセージ後のディレイ
+            time.sleep(2)
             line_bot_api.push_message(
                 user_id,
                 ImageSendMessage(
@@ -267,6 +270,10 @@ def send_content(user_id, content_type, content_data):
             )
     except LineBotApiError as e:
         print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+        line_bot_api.push_message(
+            user_id,
+            TextSendMessage(text="メッセージ送信中にエラーが発生しました。しばらくしてからもう一度試してください。")
+        )
         raise
 
 def send_question(user_id, qnum):
@@ -298,9 +305,16 @@ def handle_text(event):
 
     # ゲーム開始
     if text.lower() == "start":
-        user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False}
-        save_state_to_s3()  # 状態変更を保存
-        send_question(user_id, 0)
+        try:
+            user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False}
+            save_state_to_s3()  # 状態変更を保存
+            send_question(user_id, 0)
+        except Exception as e:
+            print(f"Error in handle_text (start): {str(e)}")
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
+            )
         return
 
     # ユーザー状態のチェック
@@ -319,7 +333,7 @@ def handle_text(event):
         qnum = state["current_q"]
         if qnum < len(questions):
             q = questions[qnum]
-            if q["hint_keyword"] and text.lower() == q["hint_keyword"].lower():  # ヒントキーワードが空でない場合のみ
+            if q["hint_keyword"] and text.lower() == q["hint_keyword"].lower():  # ヒントキーワードが空でない場合
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text=q["hint_text"])
@@ -329,20 +343,35 @@ def handle_text(event):
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text="画像で解答してください。"))
                 return
             elif isinstance(q["correct_answer"], list) and text.lower() in [ans.lower() for ans in q["correct_answer"]]:  # リスト形式の正解判定
-                user_states[user_id]["current_q"] += 1
-                save_state_to_s3()  # 状態変更を保存
-                send_question(user_id, user_states[user_id]["current_q"])
+                try:
+                    user_states[user_id]["current_q"] += 1
+                    save_state_to_s3()  # 状態変更を保存
+                    send_question(user_id, user_states[user_id]["current_q"])
+                except Exception as e:
+                    print(f"Error in handle_text (correct answer): {str(e)}")
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
+                    )
                 return
-            elif isinstance(q["correct_answer"], str) and text.lower() == q["correct_answer"].lower():  # 単一文字列の正解判定
-                user_states[user_id]["current_q"] += 1
-                save_state_to_s3()  # 状態変更を保存
-                send_question(user_id, user_states[user_id]["current_q"])
+            elif isinstance(q["correct_answer"], str) and q["correct_answer"] != "image_based" and text.lower() == q["correct_answer"].lower():  # 単一文字列の正解判定
+                try:
+                    user_states[user_id]["current_q"] += 1
+                    save_state_to_s3()  # 状態変更を保存
+                    send_question(user_id, user_states[user_id]["current_q"])
+                except Exception as e:
+                    print(f"Error in handle_text (correct answer): {str(e)}")
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
+                    )
                 return
-            else:  # その他の不正解
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=f"「ブブー、不正解です。もしヒントが欲しければ {q['hint_keyword'] and f'{q['hint_keyword']}と送ってください」' or ''}")
-                )
+            else:  # その他の不正解（第1〜4問のみ）
+                if qnum in [0, 2, 3]:  # 第1、3、4問
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{q['hint_keyword']}と送ってください")
+                    )
                 return
 
     line_bot_api.reply_message(
@@ -350,7 +379,7 @@ def handle_text(event):
         TextSendMessage(text="メッセージを理解できませんでした。")
     )
 
-# ==== 画像メッセージ処理（S3アップロード対応） ==== 
+# ==== 画像メッセージ処理（S3アップロード対応） ====
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     user_id = event.source.user_id
@@ -414,18 +443,27 @@ def judge():
                 if judge_to_process:
                     used_tokens.add(token)
                     if qnum == 4:  # 第5問の場合
-                        if result == "correct":
+                        if result == "good_end":
                             user_states[user_id]["game_cleared"] = True
                             send_content(user_id, "end_story", questions[qnum]["good_end_story"])
-                        else:
-                            line_bot_api.push_message(user_id, TextSendMessage(text="別の画像を送ってください。私に辿り着けるかな？"))
+                        elif result == "bad_end":
+                            user_states[user_id]["game_cleared"] = True
+                            send_content(user_id, "end_story", questions[qnum]["bad_end_story"])
+                        elif result == "retry":
+                            line_bot_api.push_message(
+                                user_id,
+                                TextSendMessage(text="ブブー、不正解です。別の画像を送ってください。私に辿り着けるかな？")
+                            )
                     else:  # 第2問の場合
                         if result == "correct":
                             if user_id in user_states:
                                 user_states[user_id]["current_q"] += 1
                                 send_question(user_id, user_states[user_id]["current_q"])
-                        else:
-                            line_bot_api.push_message(user_id, TextSendMessage(text="残念。不正解です。もう一度挑戦してみよう！"))
+                        elif result == "incorrect":
+                            line_bot_api.push_message(
+                                user_id,
+                                TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{questions[qnum]['hint_keyword']}と送ってください")
+                            )
 
                     judged_history.append({
                         "user_id": user_id,
