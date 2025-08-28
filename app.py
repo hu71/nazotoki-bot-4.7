@@ -199,7 +199,7 @@ questions = [
 「名探偵カエデ 死亡」数時間前入院している病室に何者かが侵入し、銃で撃たれ殺されたらしい。
 事務所に着いた時、オサダは沈痛とした表情を浮かべていた。オサダはカエデへの哀悼の言葉を口にした後、事務的に面接を始めた。
 面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。''', "delay_seconds": 1},
-            {"text": '''『終章』事件は終わった。 カエデを事故死に見せかけて殺そうとした人物、オサダは逮捕された。 オサダ探偵社は事件を作り "名探偵"に解かせるマッチポンプを長らく行っており、事実に気づいたカエデを抹殺しようとしたということらしい。
+            {"text": '''『終章』事件は終わった。 カエデを事故死に見せかけて殺しようとした人物、オサダは逮捕された。 オサダ探偵社は事件を作り "名探偵"に解かせるマッチポンプを長らく行っており、事実に気づいたカエデを抹殺しようとしたということらしい。
 カエデは探偵を辞めた。 後継者として自分を指名し、 事務所再建の費用として多額の振り込みを事務所の口座にした後、いつの間にかいなくなっていた。
 しばらくして、探偵事務所の活動がやっと軌道に乗り始めたころ。
 事務所のデスクの上に一通の手紙が置いてあった。
@@ -248,6 +248,14 @@ def send_content(user_id, content_type, content_data):
                     )
                 time.sleep(story_msg["delay_seconds"])
             line_bot_api.push_message(user_id, TextSendMessage(text="ゲームクリア！お疲れ様でした！"))
+            time.sleep(1)  # メッセージ後のディレイ
+            line_bot_api.push_message(
+                user_id,
+                ImageSendMessage(
+                    original_content_url="https://zui-xin-ban.onrender.com/static/ending.png",
+                    preview_image_url="https://zui-xin-ban.onrender.com/static/ending.png"
+                )
+            )
     except LineBotApiError as e:
         print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
         raise
@@ -294,7 +302,7 @@ def handle_text(event):
         if state.get("game_cleared", False):
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text="もう一度プレイしたい場合にはstartと送ってね")
+                TextSendMessage(text="もう一度プレイしたい場合にはstartと送ってください")
             )
             return
 
@@ -314,13 +322,12 @@ def handle_text(event):
             elif text.lower() == q["correct_answer"].lower():  # テキスト解答（第1,3,4問目）
                 user_states[user_id]["current_q"] += 1
                 save_state_to_s3()  # 状態変更を保存
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="大正解！"))
                 send_question(user_id, user_states[user_id]["current_q"])
                 return
             else:  # その他の不正解
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=f'ブブー、不正解です。もしヒントが欲しければ{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください' or ''}")
+                    TextSendMessage(text=f"ブブー、不正解です。{q['hint_keyword'] and f'{q['hint_keyword']}と送ってください' or ''}")
                 )
                 return
 
@@ -356,7 +363,7 @@ def handle_image(event):
         pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token})
         save_state_to_s3()  # 状態変更を保存
 
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください。"))
 
     except LineBotApiError as e:
         print(f"LineBotApi error: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
@@ -395,13 +402,11 @@ def judge():
                     if qnum == 4:  # 第5問の場合
                         if result == "correct":
                             user_states[user_id]["game_cleared"] = True
-                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                             send_content(user_id, "end_story", questions[qnum]["good_end_story"])
                         else:
                             line_bot_api.push_message(user_id, TextSendMessage(text="別の画像を送ってください。私に辿り着けるかな？"))
                     else:  # 第2問の場合
                         if result == "correct":
-                            line_bot_api.push_message(user_id, TextSendMessage(text="大正解！"))
                             if user_id in user_states:
                                 user_states[user_id]["current_q"] += 1
                                 send_question(user_id, user_states[user_id]["current_q"])
