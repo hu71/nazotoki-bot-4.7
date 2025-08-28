@@ -99,7 +99,7 @@ questions = [
         "story_messages": [
             {"text": '''『第一章』「やっほー！新米探偵さん！」
 「わたしは探偵所の新人サポート AI,サクラだよ。よろしくねー！」''', "delay_seconds": 1},
-            {"image_url": "https://zui-xin-ban.onrender.com/static/smartphone.png", "delay_seconds": 1},
+            {"image_url": "https://zui-xin-ban.onrender.com/static/smartphone.jpg", "delay_seconds": 1},
             {"text": '''「ここに来てるってことは、君は探偵見習いだよね？」
 「サクラの仕事は、 忙しいオサダ所長に代わって新人さんの推理力を鍛えること！」
 「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 1}
@@ -184,7 +184,7 @@ questions = [
             {"text": "→『END A』", "delay_seconds": 1},
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 1},
-            {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.png", "delay_seconds": 1},
+            {"image_url": "https://zui-xin-ban.onrender.com/static/hospital.jpg", "delay_seconds": 1},
             {"text": '''「正解だよ、新米君」そう言って病室の主、カエデは笑った。
 「そして最終回詐欺だ新米君。本真の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 1}
         ],
