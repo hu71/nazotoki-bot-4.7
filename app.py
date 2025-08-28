@@ -7,6 +7,7 @@ from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, ImageMessage
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
+
 # Flaskアプリケーションの設定
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
@@ -92,7 +93,7 @@ questions = [
         ],
         "image_url": {"url": "https://zui-xin-ban.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "hint3",
-        "hint_text": "365 きょねん←ことし→らいねん",
+        "hint_text": "第3問のヒントです",
         "correct_answer": "correct3"
     },
     {
@@ -147,13 +148,6 @@ questions = [
 「名探偵カエデ 死亡」数時間前入院している病室に何者かが侵入し、銃で撃たれ殺されたらしい。
 事務所に着いた時、オサダは沈痛とした表情を浮かべていた。オサダはカエデへの哀悼の言葉を口にした後、事務的に面接を始めた。
 面接の間ずっと、オサダの眼は少し濁った緑色をして、こちらを見つめていた。''', "delay_seconds": 1}
-            {"text": '''事件は終わった。 
-カエデを事故死に見せかけて殺そうとした人物、オサダは逮捕された。 
-オサダ探偵社は事件を作り 『名探偵』に解かせるマッチポンプを長らく行っており、事実に気づいたカエデを抹殺しようとしたということらしい。
-カエデは探偵を辞めた。 後継者として自分を指名し、 事務所再建の費用として多額の振り込みを事務所の口座にした後、いつの間にかいなくなっていた。
-しばらくして、探偵事務所の活動がやっと軌道に乗り始めたころ。
-事務所のデスクの上に一通の手紙が置いてあった。
-宛名は、カエデから。''', "delay_seconds": 1}
         ]
     }
 ]
@@ -289,15 +283,14 @@ def handle_image(event):
     try:
         message_content = line_bot_api.get_message_content(event.message.id)
         unique_filename = f"{user_id}_{qnum}_{uuid.uuid4()}.jpg"
-        from io import BytesIO
-        file_bites=BytesIO(message_content.content).read()
+        file_bytes = b"".join([chunk for chunk in message_content.iter_content(chunk_size=1024)])
 
         # S3にアップロード
-        s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes,ContentType='image/jpeg')
+        s3_client.put_object(Bucket=AWS_S3_BUCKET_NAME, Key=unique_filename, Body=file_bytes, ACL='public-read', ContentType='image/jpeg')
         s3_url = f"https://{AWS_S3_BUCKET_NAME}.s3.{AWS_S3_REGION}.amazonaws.com/{unique_filename}"
 
         token = str(uuid.uuid4())
-        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token,"s3_key":unique_filename})
+        pending_judges.append({"user_id": user_id, "qnum": qnum, "img_url": s3_url, "token": token})
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください！"))
 
@@ -324,7 +317,6 @@ def judge():
         qnum = request.form.get("qnum")
         result = request.form.get("result")
         token = request.form.get("token")
-        img_url=request.form.get("img_url","/static/placeholder.jpg")
 
         if token in used_tokens:
             print(f"Duplicate request detected for token: {token}")
@@ -347,7 +339,7 @@ def judge():
                     judged_history.append({
                         "user_id": user_id,
                         "qnum": qnum,
-                        "img_url": img_url,
+                        "img_url": judge_to_process["img_url"],
                         "result": result,
                         "token": token
                     })
@@ -358,22 +350,8 @@ def judge():
             except ValueError:
                 print(f"Invalid qnum: {qnum}")
                 return "Invalid data", 400
-                
-    # ==== 修正: presigned URL 生成（有効期限5日=432000秒）====
-    judges_with_urls = []
-    for j in pending_judges:
-        presigned_url = s3_client.generate_presigned_url(
-            'get_object',
-            Params={
-                'Bucket': AWS_S3_BUCKET_NAME,
-                'Key': j['s3_key']  # S3のファイル名を指定
-            },
-            ExpiresIn=432000  # 5日
-        )
-        judges_with_urls.append({**j, "img_url": presigned_url})
 
-
-    response = make_response(render_template("judge.html", judges=judges_with_urls, history=judged_history))
+    response = make_response(render_template("judge.html", judges=pending_judges, history=judged_history))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
 
