@@ -242,7 +242,7 @@ def send_content(user_id, content_type, content_data):
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:  # 第2問と第5問は画像
                 line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるものの写真を送ってください」"))
             else:
-                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるテキストを送ってね」"))
+                line_bot_api.push_message(user_id, TextSendMessage(text="「答えとなるテキストを送ってください」"))
         elif content_type == "end_story":
             for story_msg in content_data:
                 if "text" in story_msg:
