@@ -287,6 +287,16 @@ def send_content(user_id, content_type, content_data):
 第5問からもう1度プレイしたい場合にはanotherと送ってください。
 本日は大高祭3-4HR企画にお越しいいただきありがとうございました！''')
             )
+            # 初回クリア時（another_count == 0）にosada.jpgを送信
+            if user_states.get(user_id, {}).get("another_count", 0) == 0:
+                osada_image_url = "https://nazotoki-bot-4-7-9hls.onrender.com/static/osada.jpg"
+                line_bot_api.push_message(
+                    user_id,
+                    ImageSendMessage(
+                        original_content_url=osada_image_url,
+                        preview_image_url=osada_image_url
+                    )
+                )
     except LineBotApiError as e:
         print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
         line_bot_api.push_message(
