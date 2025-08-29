@@ -20,7 +20,6 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
 AWS_S3_REGION = os.environ.get("AWS_S3_REGION", "us-east-1")
 
-# 環境変数の検証
 missing_env_vars = []
 if not LINE_CHANNEL_ACCESS_TOKEN:
     missing_env_vars.append("LINE_CHANNEL_ACCESS_TOKEN")
@@ -113,8 +112,8 @@ questions = [
 「では早速、問題！探偵見習いのテストだよ。制限時間は……所長が帰ってくるまでにしましょう。困ったら頭をひっくり返して、最初から考えてみるといいですよ。」''', "delay_seconds": 1}
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question1.jpg", "delay_seconds": 1},
-        "hint_keyword": "hint1",
-        "hint_text": "「手の本数に着目してみてください」",
+        "hint_keyword": "101",
+        "hint_text": "「手の本数に着目してみてください。さらにヒントが欲しければ110と送ってください。」",
         "correct_answer": "たんてい"
     },
     {
@@ -137,8 +136,8 @@ questions = [
 「どうですか、探偵カエデの活躍を見て？ あなたもこんな風になれるよう頑張りましょう！謎も難しいですよ、 事務所のはチュートリアルみたいなものですからね！というわけで今日の一問！困ったら頭をひっくり返して、ですよ」''', "delay_seconds": 1}
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question2.jpg", "delay_seconds": 1},
-        "hint_keyword": "hint2",
-        "hint_text": "「問題文についている矢印に注目してみてください」",
+        "hint_keyword": "210",
+        "hint_text": "「問題文についている矢印に注目してみてください。さらにヒントが欲しければ201と送ってください。」",
         "correct_answer": "image_based"
     },
     {
@@ -152,8 +151,8 @@ questions = [
             {"text": "「さて、雑談もこの辺に、次の問題です！難しいですよ、頭をぐるぐる回して考えてみてください」", "delay_seconds": 1}
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question3.jpg", "delay_seconds": 1},
-        "hint_keyword": "hint3",
-        "hint_text": "「［365］←◯⚪︎◯◯←◯◯◯→らいねん→」",
+        "hint_keyword": "300",
+        "hint_text": "「例えばこの例なんかはどうでしょうか。『［365］◯⚪︎◯◯←◯◯◯→らいねん』さらにヒントが欲しければ301と送ってください。」",
         "correct_answer": "じこし"
     },
     {
@@ -172,8 +171,8 @@ questions = [
 「新米さん、アドバイスの続きです。問題を用意しました。実際の事件を基にした推理小説風の問題です、頭をフル回転して解いてくださいね」''', "delay_seconds": 1}
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question4.jpg", "delay_seconds": 1},
-        "hint_keyword": "hint4",
-        "hint_text": "「ミノルは犯人ではないそうですよ」",
+        "hint_keyword": "411",
+        "hint_text": "「ミノルは犯人ではないそうですよ。さらにヒントが欲しければ401と送ってください。」",
         "correct_answer": [
             "あおいとひろき",
             "ひろきとあおい",
