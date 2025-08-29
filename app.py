@@ -263,7 +263,7 @@ def send_content(user_id, content_type, content_data):
             else:
                 message = "答えとなるテキストを送ってください。"
                 if q["hint_keyword"]:
-                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください."
+                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください。"
                 line_bot_api.push_message(user_id, TextSendMessage(text=message))
         elif content_type == "end_story":
             for story_msg in content_data:
