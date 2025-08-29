@@ -1,5 +1,3 @@
-いよいよ明日が文化祭で、最終確認とかテストプレイをはじめてます
-
 # -*- coding: utf-8 -*-
 import os
 import time
