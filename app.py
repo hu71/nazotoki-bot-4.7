@@ -133,7 +133,7 @@ questions = [
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question1.jpg", "delay_seconds": 1},
         "hint_keyword": "101",
-        "hint_text": "「手の本数に着目してみてください。さらにヒントが欲しければ110と送ってください。」",
+        "hint_text": "「手の本数に着目してみたらどうでしょうか？さらにヒントが欲しければ110と送ってください。」",
         "correct_answer": "たんてい"
     },
     {
@@ -161,7 +161,7 @@ questions = [
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question2.jpg", "delay_seconds": 1},
         "hint_keyword": "210",
-        "hint_text": "「問題文についている矢印に注目してみてください。さらにヒントが欲しければ201と送ってください。」",
+        "hint_text": "「問題文の矢印。何を意味しているんでしょうね？さらにヒントが欲しければ201と送ってください。」",
         "correct_answer": "image_based"
     },
     {
@@ -177,7 +177,7 @@ questions = [
         ],
         "image_url": {"url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/question3.jpg", "delay_seconds": 1},
         "hint_keyword": "300",
-        "hint_text": '''「例えばこの例なんかはどうでしょうか。
+        "hint_text": '''「この法則でいくと……他にはこんな感じですかね？
 『［365］◯⚪︎◯◯←◯◯◯→らいねん』
 さらにヒントが欲しければ301と送ってください。」''',
         "correct_answer": "じこし"
@@ -222,7 +222,7 @@ questions = [
         "hint_text": "",
         "correct_answer": "image_based",
         "good_end_story": [
-            {"text": "→『END A』", "delay_seconds": 1},
+            {"text": "→『GOOD END』", "delay_seconds": 1},
             {"text": '''名探偵の記事、探偵についての言葉、これまでの謎、すべてが答えを示していた。ならば、行くべき場所は分かり切っている。
 電車に乗り、地図を開き、受付で事務所の関係者を名乗り、エレベーターに乗り、目的の扉を探し当て、ノックをし、部屋に入る。''', "delay_seconds": 2},
             {"image_url": "https://nazotoki-bot-4-7-9hls.onrender.com/static/hospital.jpg", "delay_seconds": 0},
@@ -230,7 +230,7 @@ questions = [
 「そして最終回詐欺だ新米君。本当の最後の謎、私が君に伝えたかったことは？」''', "delay_seconds": 2}
         ],
         "bad_end_story": [
-            {"text": "→『END B』", "delay_seconds": 1},
+            {"text": "→『BAD END』", "delay_seconds": 1},
             {"text": '''「正解です。流石ですね」そう答えたサクラの返事は、ひどく無機質なものに思えた。
 その後、サクラが一言も話すことはなかった。
 探偵社までの電車に乗っている最中。車内に衝撃的なニュースが流れていた。
