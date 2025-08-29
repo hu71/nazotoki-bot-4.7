@@ -289,7 +289,7 @@ def send_content(user_id, content_type, content_data):
             )
             # 初回クリア時（another_count == 0）にosada.jpgを送信
             if user_states.get(user_id, {}).get("another_count", 0) == 0:
-                osada_image_url = "https://nazotoki-bot-4-7-9hls.onrender.com/static/osada.jpg"
+                osada_image_url = "https://nazotoki-bot-4-7-9hls.onrender.com/static/osada1.jpg"
                 line_bot_api.push_message(
                     user_id,
                     ImageSendMessage(
