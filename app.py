@@ -278,7 +278,7 @@ def send_content(user_id, content_type, content_data):
             else:
                 message = "答えとなるテキストを送ってください。"
                 if q["hint_keyword"]:
-                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください."
+                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください。"
                 line_bot_api.push_message(user_id, TextSendMessage(text=message))
         elif content_type == "end_story":
             for story_msg in content_data:
@@ -457,7 +457,7 @@ def handle_text(event):
                     if qnum in [0, 2, 3]:
                         line_bot_api.reply_message(
                             event.reply_token,
-                            TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{q['hint_keyword']}と送ってください")
+                            TextSendMessage(text=f"「ブブー、不正解です。もしもヒントが欲しければ、{q['hint_keyword']}と送ってください。」")
                         )
                     return
 
@@ -544,7 +544,7 @@ def judge():
                         elif result == "retry":
                             line_bot_api.push_message(
                                 user_id,
-                                TextSendMessage(text="ブブー、不正解です。別の画像を送ってください。私に辿り着けるかな？")
+                                TextSendMessage(text="「ブブー、不正解です。別の画像を送ってください。もしもヒントが欲しければ周囲の事務所スタッフに聞いてみてください。")
                             )
                     else:
                         if result == "correct":
@@ -554,7 +554,7 @@ def judge():
                         elif result == "incorrect":
                             line_bot_api.push_message(
                                 user_id,
-                                TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{questions[qnum]['hint_keyword']}と送ってください")
+                                TextSendMessage(text=f"「ブブー、不正解です。もしもヒントが欲しければ、{questions[qnum]['hint_keyword']}と送ってください。」")
                             )
 
                     judged_history.append({
