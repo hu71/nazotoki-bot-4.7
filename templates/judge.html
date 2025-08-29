@@ -120,14 +120,14 @@
                                         <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                         <input type="hidden" name="result" value="good_end">
                                         <input type="hidden" name="token" value="{{ judge.token|default('') }}">
-                                        <button type="submit" class="btn btn-good-end btn-sm text-white">グッドエンド</button>
+                                        <button type="submit" class="btn btn-good-end btn-sm text-white">カエデ</button>
                                     </form>
                                     <form class="judge-form" method="post" action="/judge">
                                         <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
                                         <input type="hidden" name="qnum" value="{{ judge.qnum|default(0) }}">
                                         <input type="hidden" name="result" value="bad_end">
                                         <input type="hidden" name="token" value="{{ judge.token|default('') }}">
-                                        <button type="submit" class="btn btn-bad-end btn-sm text-white">バッドエンド</button>
+                                        <button type="submit" class="btn btn-bad-end btn-sm text-white">サクラ</button>
                                     </form>
                                     <form class="judge-form" method="post" action="/judge">
                                         <input type="hidden" name="user_id" value="{{ judge.user_id|default('') }}">
