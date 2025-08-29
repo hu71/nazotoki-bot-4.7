@@ -54,7 +54,7 @@ s3_client = boto3.client(
 STATE_FILE_KEY = "app_state.json"
 
 # ==== 状態変数（初期化） ====
-user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool, "another_count": int}}
+user_states = {}  # {user_id: {"current_q": int, "answers": [list of answers], "game_cleared": bool, "another_count": int, "is_processing": bool}}
 pending_judges = []  # [{"user_id": str, "qnum": int, "img_url": str, "token": str}]
 judged_history = []  # [{"user_id": str, "qnum": int, "img_url": str, "result": str, "token": str}]
 used_tokens = set()  # 使用済みトークンを追跡
@@ -78,7 +78,7 @@ def load_state_from_s3():
     except Exception as e:
         print(f"Unexpected error loading state: {str(e)}")
 
-# ==== S3に状態を保存 ====
+# ==== S3に状態を保存（競合防止） ====
 def save_state_to_s3():
     state_data = {
         "user_states": user_states,
@@ -87,6 +87,20 @@ def save_state_to_s3():
         "used_tokens": list(used_tokens)
     }
     try:
+        # 状態保存前に最新状態を再ロード
+        try:
+            response = s3_client.get_object(Bucket=AWS_S3_BUCKET_NAME, Key=STATE_FILE_KEY)
+            current_state = json.loads(response['Body'].read().decode('utf-8'))
+            for user_id, state in current_state.get("user_states", {}).items():
+                if user_id not in user_states:
+                    user_states[user_id] = state
+            pending_judges.extend([j for j in current_state.get("pending_judges", []) if j not in pending_judges])
+            judged_history.extend([j for j in current_state.get("judged_history", []) if j not in judged_history])
+            used_tokens.update(current_state.get("used_tokens", []))
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'NoSuchKey':
+                print(f"Error reloading state from S3: {str(e)}")
+        # 保存
         s3_client.put_object(
             Bucket=AWS_S3_BUCKET_NAME,
             Key=STATE_FILE_KEY,
@@ -235,6 +249,7 @@ questions = [
 
 # ==== 関数: 問題またはストーリーを送信 ====
 def send_content(user_id, content_type, content_data):
+    print(f"send_content: user_id={user_id}, content_type={content_type}, current_q={user_states.get(user_id, {}).get('current_q', 'N/A')}")
     try:
         if content_type == "question":
             q = content_data
@@ -287,7 +302,7 @@ def send_content(user_id, content_type, content_data):
 第5問からもう1度プレイしたい場合にはanotherと送ってください。
 本日は大高祭3-4HR企画にお越しいいただきありがとうございました！''')
             )
-            # 初回クリア時（another_count == 0）にosada.jpgを送信
+            # 初回クリア時（another_count == 0）にosada1.jpgを送信
             if user_states.get(user_id, {}).get("another_count", 0) == 0:
                 osada_image_url = "https://nazotoki-bot-4-7-9hls.onrender.com/static/osada1.jpg"
                 line_bot_api.push_message(
@@ -298,7 +313,7 @@ def send_content(user_id, content_type, content_data):
                     )
                 )
     except LineBotApiError as e:
-        print(f"Failed to send content to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+        print(f"LineBotApiError in send_content: user_id={user_id}, error={str(e)}, status_code={getattr(e, 'status_code', 'N/A')}")
         line_bot_api.push_message(
             user_id,
             TextSendMessage(text="メッセージ送信中にエラーが発生しました。しばらくしてからもう一度試してください。")
@@ -331,116 +346,136 @@ def callback():
 def handle_text(event):
     user_id = event.source.user_id
     text = event.message.text.strip().replace('\u3000', '')
+    print(f"handle_text: user_id={user_id}, text={text}, user_state={user_states.get(user_id, {})}")
 
-    ignore_numbers = ["110", "111", "201", "211", "301", "311", "401", "410"]
-    if text in ignore_numbers:
+    # 処理中チェック
+    if user_id in user_states and user_states[user_id].get("is_processing", False):
+        print(f"handle_text: Skipping due to is_processing=True for user_id={user_id}")
         return
 
-    # ゲーム開始（1回のみ）
-    if text.lower() == "start":
+    try:
+        # 処理開始
         if user_id in user_states:
-            return  # 2度目のstartは無反応
-        try:
-            user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False, "another_count": 0}
-            save_state_to_s3()
-            send_question(user_id, 0)
-        except Exception as e:
-            print(f"Error in handle_text (start): {str(e)}")
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
-            )
-        return
+            user_states[user_id]["is_processing"] = True
+        else:
+            user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False, "another_count": 0, "is_processing": True}
+        save_state_to_s3()
 
-    # 第5問再プレイ（2回まで）
-    if text.lower() == "another":
-        try:
-            if user_id not in user_states:
-                user_states[user_id] = {"current_q": 4, "answers": [], "game_cleared": False, "another_count": 1}
-            else:
-                another_count = user_states[user_id].get("another_count", 0)
-                if another_count >= 2:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
-                    )
-                    return
-                user_states[user_id]["current_q"] = 4
-                user_states[user_id]["game_cleared"] = False
-                user_states[user_id]["another_count"] = another_count + 1
-            save_state_to_s3()
-            send_question(user_id, 4)
-        except Exception as e:
-            print(f"Error in handle_text (another): {str(e)}")
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
-            )
-        return
+        ignore_numbers = ["110", "111", "201", "211", "301", "311", "401", "410"]
+        if text in ignore_numbers:
+            return
 
-    # ユーザー状態のチェック
-    if user_id in user_states:
-        state = user_states[user_id]
-        
-        # ゲームクリア後の場合
-        if state.get("game_cleared", False):
-            if state.get("another_count", 0) >= 2:
+        # ゲーム開始（1回のみ）
+        if text.lower() == "start":
+            if user_id in user_states and user_states[user_id].get("current_q", 0) > 0:
+                return  # 2度目のstartは無反応
+            try:
+                user_states[user_id] = {"current_q": 0, "answers": [], "game_cleared": False, "another_count": 0, "is_processing": True}
+                save_state_to_s3()
+                send_question(user_id, 0)
+            except Exception as e:
+                print(f"Error in handle_text (start): {str(e)}")
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
-                )
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text="第5問からもう1度プレイしたい場合にはanotherと送ってください。")
+                    TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
                 )
             return
 
-        # 問題処理ロジック
-        qnum = state["current_q"]
-        if qnum < len(questions):
-            q = questions[qnum]
-            if q["hint_keyword"] and text.lower() == q["hint_keyword"].lower():
+        # 第5問再プレイ（2回まで）
+        if text.lower() == "another":
+            try:
+                if user_id not in user_states:
+                    user_states[user_id] = {"current_q": 4, "answers": [], "game_cleared": False, "another_count": 1, "is_processing": True}
+                else:
+                    another_count = user_states[user_id].get("another_count", 0)
+                    if another_count >= 2:
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
+                        )
+                        return
+                    user_states[user_id]["current_q"] = 4
+                    user_states[user_id]["game_cleared"] = False
+                    user_states[user_id]["another_count"] = another_count + 1
+                save_state_to_s3()
+                send_question(user_id, 4)
+            except Exception as e:
+                print(f"Error in handle_text (another): {str(e)}")
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=q["hint_text"])
+                    TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
                 )
-                return
-            elif qnum in [1, 4]:
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text="画像で解答してください。")
-                )
-                return
-            elif isinstance(q["correct_answer"], str) and q["correct_answer"] != "image_based" and text.lower() == q["correct_answer"].lower():
-                try:
-                    user_states[user_id]["current_q"] += 1
-                    save_state_to_s3()
-                    send_question(user_id, user_states[user_id]["current_q"])
-                except Exception as e:
-                    print(f"Error in handle_text (correct answer): {str(e)}")
+            return
+
+        # ユーザー状態のチェック
+        if user_id in user_states:
+            state = user_states[user_id]
+            
+            # ゲームクリア後の場合
+            if state.get("game_cleared", False):
+                if state.get("another_count", 0) >= 2:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
+                        TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいただきありがとうございました。")
                     )
-                return
-            else:
-                if qnum in [0, 2, 3]:
+                else:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{q['hint_keyword']}と送ってください")
+                        TextSendMessage(text="第5問からもう1度プレイしたい場合にはanotherと送ってください。")
                     )
                 return
 
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text="まずはstartと送って始めてね")
-    )
+            # 問題処理ロジック
+            qnum = state["current_q"]
+            if qnum < len(questions):
+                q = questions[qnum]
+                if q["hint_keyword"] and text.lower() == q["hint_keyword"].lower():
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text=q["hint_text"])
+                    )
+                    return
+                elif qnum in [1, 4]:
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text="画像で解答してください。")
+                    )
+                    return
+                elif isinstance(q["correct_answer"], str) and q["correct_answer"] != "image_based" and text.lower() == q["correct_answer"].lower():
+                    try:
+                        user_states[user_id]["current_q"] += 1
+                        save_state_to_s3()
+                        send_question(user_id, user_states[user_id]["current_q"])
+                    except Exception as e:
+                        print(f"Error in handle_text (correct answer): {str(e)}")
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(text="サーバーエラー：状態の保存に失敗しました。もう一度試してください。")
+                        )
+                    return
+                else:
+                    if qnum in [0, 2, 3]:
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(text=f"ブブー、不正解です。もしもヒントが欲しければ、{q['hint_keyword']}と送ってください")
+                        )
+                    return
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="まずはstartと送って始めてね")
+        )
+    finally:
+        # 処理終了
+        if user_id in user_states:
+            user_states[user_id]["is_processing"] = False
+            save_state_to_s3()
 
 # ==== 画像メッセージ処理（S3アップロード対応） ====
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     user_id = event.source.user_id
+    print(f"handle_image: user_id={user_id}, user_state={user_states.get(user_id, {})}")
 
     if user_id not in user_states:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="まずはstartと送って始めてね"))
@@ -466,16 +501,16 @@ def handle_image(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="判定中です。しばらくお待ちください。"))
 
     except LineBotApiError as e:
-        print(f"LineBotApi error: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+        print(f"LineBotApiError in handle_image: user_id={user_id}, error={str(e)}, status_code={getattr(e, 'status_code', 'N/A')}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：API接続に失敗しました。"))
     except PermissionError as pe:
-        print(f"Permission error: {str(pe)}")
+        print(f"Permission error in handle_image: {str(pe)}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：書き込み権限がありません。"))
     except IOError as ioe:
-        print(f"IO error: {str(ioe)}")
+        print(f"IO error in handle_image: {str(ioe)}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="サーバーエラー：ファイル操作に失敗しました。"))
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
+        print(f"Unexpected error in handle_image: {str(e)}")
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="画像の処理中にエラーが発生しました。もう一度試してください。"))
 
 # ==== 判定フォーム ====
@@ -532,10 +567,10 @@ def judge():
                     pending_judges = [j for j in pending_judges if not (j["user_id"] == user_id and j["qnum"] == qnum and j["token"] == token)]
                     save_state_to_s3()
             except LineBotApiError as e:
-                print(f"Failed to send result to {user_id}: {str(e)} - Status code: {getattr(e, 'status_code', 'N/A')}")
+                print(f"LineBotApiError in judge: user_id={user_id}, error={str(e)}, status_code={getattr(e, 'status_code', 'N/A')}")
                 return "API error", 500
             except ValueError:
-                print(f"Invalid qnum: {qnum}")
+                print(f"Invalid qnum in judge: {qnum}")
                 return "Invalid data", 400
 
     response = make_response(render_template("judge.html", judges=pending_judges, history=judged_history))
