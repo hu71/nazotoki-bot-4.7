@@ -314,10 +314,9 @@ def handle_text(event):
     user_id = event.source.user_id
     text = event.message.text.strip()
 
-    # 無視する数字リスト
     ignore_numbers = ["110", "111", "201", "211", "301", "311", "401", "410"]
     if text in ignore_numbers:
-        return  # 何も返信しない
+        return
 
     # ゲーム開始
     if text.lower() == "start":
