@@ -256,9 +256,15 @@ def send_content(user_id, content_type, content_data):
             )
             time.sleep(q["image_url"]["delay_seconds"] + 1)
             if "current_q" in user_states[user_id] and user_states[user_id]["current_q"] in [1, 4]:
-                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるものの写真を送ってください"))
+                message = "答えとなるものの写真を送ってください。"
+                if q["hint_keyword"]:
+                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください。"
+                line_bot_api.push_message(user_id, TextSendMessage(text=message))
             else:
-                line_bot_api.push_message(user_id, TextSendMessage(text="答えとなるテキストを送ってください"))
+                message = "答えとなるテキストを送ってください。"
+                if q["hint_keyword"]:
+                    message += f" ヒントが欲しい場合には{q['hint_keyword']}と送ってください."
+                line_bot_api.push_message(user_id, TextSendMessage(text=message))
         elif content_type == "end_story":
             for story_msg in content_data:
                 if "text" in story_msg:
@@ -336,17 +342,17 @@ def handle_text(event):
             )
         return
 
-    # 第5問再プレイ（3回まで）
+    # 第5問再プレイ（2回まで）
     if text.lower() == "another":
         try:
             if user_id not in user_states:
                 user_states[user_id] = {"current_q": 4, "answers": [], "game_cleared": False, "another_count": 1}
             else:
                 another_count = user_states[user_id].get("another_count", 0)
-                if another_count >= 3:
+                if another_count >= 2:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text="これ以上の再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
+                        TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
                     )
                     return
                 user_states[user_id]["current_q"] = 4
@@ -368,7 +374,7 @@ def handle_text(event):
         
         # ゲームクリア後の場合
         if state.get("game_cleared", False):
-            if state.get("another_count", 0) >= 3:
+            if state.get("another_count", 0) >= 2:
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="これ以上再プレイできません。本日は3-4HR企画にお越しいいただきありがとうございました。")
