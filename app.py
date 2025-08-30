@@ -434,7 +434,7 @@ def handle_text(event):
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text="まずはstartと送って始めてね")
+        TextSendMessage(text="startと送ると、初めからやり直せます")
     )
 
 # ==== 画像メッセージ処理（S3アップロード対応） ====
